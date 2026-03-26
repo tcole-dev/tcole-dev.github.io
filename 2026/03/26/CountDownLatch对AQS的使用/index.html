@@ -94,7 +94,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/images/redefine-og.webp">
 <meta property="article:published_time" content="2026-03-26T01:32:55.000Z">
-<meta property="article:modified_time" content="2026-03-26T01:34:43.760Z">
+<meta property="article:modified_time" content="2026-03-26T08:50:06.045Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="JUC">
 <meta name="twitter:card" content="summary">
@@ -327,8 +327,8 @@
     
         <span class="article-date article-meta-item">
             <i class="fa-regular fa-wrench"></i>&nbsp;
-            <span class="desktop">2026-03-26 09:34:43</span>
-            <span class="mobile">2026-03-26 09:34:43</span>
+            <span class="desktop">2026-03-26 16:50:06</span>
+            <span class="mobile">2026-03-26 16:50:06</span>
             <span class="hover-info">更新</span>
         </span>
     
@@ -366,16 +366,17 @@
 
 
 		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
-			<h2 id="大纲"><a href="#大纲" class="headerlink" title="大纲"></a>大纲</h2><ol>
-<li><a href="##CountDownLatch%E7%AE%80%E8%BF%B0">什么是 CountDownLatch</a></li>
-<li><a href="##CountDownLatch%E7%94%A8%E5%A4%84%E5%8F%8A%E7%94%A8%E6%B3%95">CountDownLatch 的用处</a></li>
-<li><a href="##CountDownLatch%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86">CountDownLatch 的实现原理</a><ol>
-<li><a href="###CountDownLatch%E4%B8%BB%E8%A6%81%E7%BB%93%E6%9E%84">CountDownLatch 主要结构</a></li>
-<li><a href="###%E4%B8%BB%E8%A6%81%E6%96%B9%E6%B3%95%E5%AE%9E%E7%8E%B0">CountDownLatch 主要方法实现</a></li>
-<li><a href="###AQS%E7%9A%84%E7%8B%AC%E7%89%B9%E8%BF%90%E7%94%A8">AQS运用和 ReentrantLock 等<code>锁</code>的差异</a></li>
-</ol>
+			<h2 id="大纲"><a href="#大纲" class="headerlink" title="大纲"></a>大纲</h2><ul>
+<li><a href="#%E5%A4%A7%E7%BA%B2">大纲</a></li>
+<li><a href="#countdownlatch%E7%AE%80%E8%BF%B0">CountDownLatch简述</a></li>
+<li><a href="#countdownlatch%E7%94%A8%E5%A4%84%E5%8F%8A%E7%94%A8%E6%B3%95">CountDownLatch用处及用法</a></li>
+<li><a href="#countdownlatch%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86">CountDownLatch的实现原理</a><ul>
+<li><a href="#countdownlatch%E4%B8%BB%E8%A6%81%E7%BB%93%E6%9E%84">CountDownLatch主要结构</a></li>
+<li><a href="#%E4%B8%BB%E8%A6%81%E6%96%B9%E6%B3%95%E5%AE%9E%E7%8E%B0">主要方法实现</a></li>
+<li><a href="#aqs%E7%9A%84%E7%8B%AC%E7%89%B9%E8%BF%90%E7%94%A8">AQS的独特运用</a></li>
+</ul>
 </li>
-</ol>
+</ul>
 <h2 id="CountDownLatch简述"><a href="#CountDownLatch简述" class="headerlink" title="CountDownLatch简述"></a>CountDownLatch简述</h2><p><code>CountDownLatch</code>按照功能划分来说，应该叫做同步工具类，虽然常常和ReentrantLock（锁）、ConcurrentHashMap（并发容器）等放在一起谈及，它们常常使用到一些共通的思想，但三者在功能和实现上有极大区别。</p>
 <p><code>CountDownLatch</code>用于阻塞一个或多个线程，并在满足条件（其他被等待的线程完成任务）时将这些线程全部唤醒，让被阻塞线程能够执行后续任务。</p>
 <div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">举例：</span><br><span class="line">A、B、C一起赛跑，计时员需要阻塞等待三人到达，才能在纸上统计三人成绩。</span><br><span class="line">A体力更好，跑到终点时，B、C还在半路，此时等待人数减一。</span><br><span class="line">B到达后，还需要等待一个人。</span><br><span class="line">C到达后，三人全部到达，便唤醒了阻塞的计时员，被阻塞的计时员（可能有多个）一起执行后续任务（统计成绩）。</span><br></pre></td></tr></table></figure></div>
@@ -401,7 +402,7 @@
 <img  
                      lazyload
                      src="/images/loading.svg"
-                     data-src="C:\Users\t'c\Desktop\JUC\CountDownlatch_await.png"
+                     data-src="images/CountDownlatch_await.png"
                       style='zoom:50%'
                 > 
 
@@ -411,7 +412,7 @@
 <img  
                      lazyload
                      src="/images/loading.svg"
-                     data-src="C:\Users\t'c\Desktop\JUC\CountDownLatch_countDown.png"
+                     data-src="images/CountDownLatch_countDown.png"
                       style='zoom:60%'
                 > 
 
@@ -444,7 +445,7 @@
         
             <li>
                 <strong>更新于
-                    :</strong> 2026-03-26 09:34:43
+                    :</strong> 2026-03-26 16:50:06
             </li>
         
         <li>
