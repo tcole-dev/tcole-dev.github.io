@@ -347,7 +347,7 @@
 
         <div class="statistics flex justify-around my-2.5">
     <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
-        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">4</div>
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">13</div>
         <div class="label text-third-text-color text-sm">标签</div>
     </a>
     <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
@@ -355,7 +355,7 @@
         <div class="label text-third-text-color text-sm">分类</div>
     </a>
     <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
-        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">2</div>
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">9</div>
         <div class="label text-third-text-color text-sm">文章</div>
     </a>
 </div>
@@ -382,12 +382,12 @@
                 <div class="author flex flex-col justify-center my-2.5 mx-0">
     <div class="name">tcole</div>
     
-        <div class="label">Lv1</div>
+        <div class="label">Lv2</div>
     
 </div>
                 <div class="statistics flex justify-around my-2.5">
     <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
-        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">4</div>
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">13</div>
         <div class="label text-third-text-color text-sm">标签</div>
     </a>
     <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
@@ -395,7 +395,7 @@
         <div class="label text-third-text-color text-sm">分类</div>
     </a>
     <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
-        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">2</div>
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">9</div>
         <div class="label text-third-text-color text-sm">文章</div>
     </a>
 </div>
@@ -542,6 +542,438 @@ CountDownLatch简述CountDownLatch按照功能划分来说，应该叫做同步�
                 </div>
             </li>
         
+            <li class="home-article-item">
+
+                
+
+                
+
+                
+                <div class="flex flex-col gap-5 px-7 pb-7 pt-7">
+                    <h3 class="home-article-title">
+                        <a href="/2026/01/30/AQS%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
+                            AQS深度解析
+                        </a>
+                    </h3>
+
+                    <div class="home-article-content markdown-body">
+                        
+                            
+                            AQS深度解析AQS 整体架构AQS（AbstractQueuedSynchronizer）是Java并发包的核心基础，提供了一个基于FIFO等待队列的框架，用于构建锁和同步器。
+核心设计思想
+资源管理：使用一个volatile int state变量来管理同步状态
+线程等待：通过CLH队列管理等待的线程
+CAS操作：保证状态修改的原子性
+模板方法：提供可重写的钩子方法，子类实现具体逻辑
+
+...
+                        
+                    </div>
+
+                    <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fa-solid fa-calendars"></i>&nbsp;
+            <span class="home-article-date" data-date="Fri Jan 30 2026 22:09:07 GMT+0800">
+                
+                    2026-01-30
+                
+            </span>
+        </span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fa-solid fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/JUC/">JUC</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/AQS/">AQS</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2026/01/30/AQS%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">阅读全文<span class="seo-reader-text">AQS深度解析</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
+</div>
+
+                </div>
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                
+
+                
+                <div class="flex flex-col gap-5 px-7 pb-7 pt-7">
+                    <h3 class="home-article-title">
+                        <a href="/2026/01/12/java%E5%B9%B6%E5%8F%91%E5%9F%BA%E7%A1%80%E5%8F%8AJUC%E5%BC%95%E5%85%A5/">
+                            java并发基础
+                        </a>
+                    </h3>
+
+                    <div class="home-article-content markdown-body">
+                        
+                            
+                            java多线程实现方式
+继承Thread类，重写run方法，直接创建该对象，执行start方法即可
+
+实现Runnable接口，重写run方法，将定义类的对象作为参数传入new Thread()方法（或使用匿名内部类），执行run方法
+
+实现Callable接口，重写call方法，同样将Callable接口对象作为参数传入一个未来任务类构造方法，再将任务类对象传入Thread构造方法，再调用...
+                        
+                    </div>
+
+                    <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fa-solid fa-calendars"></i>&nbsp;
+            <span class="home-article-date" data-date="Mon Jan 12 2026 19:03:17 GMT+0800">
+                
+                    2026-01-12
+                
+            </span>
+        </span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fa-solid fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/JUC/">JUC</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">多线程</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/Synchronized-Volatile/">Synchronized &amp; Volatile</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2026/01/12/java%E5%B9%B6%E5%8F%91%E5%9F%BA%E7%A1%80%E5%8F%8AJUC%E5%BC%95%E5%85%A5/">阅读全文<span class="seo-reader-text">java并发基础</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
+</div>
+
+                </div>
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                
+
+                
+                <div class="flex flex-col gap-5 px-7 pb-7 pt-7">
+                    <h3 class="home-article-title">
+                        <a href="/2025/12/12/java-NIO%E7%AE%80%E8%BF%B0%E5%92%8C%E4%BD%BF%E7%94%A8/">
+                            java NIO简述和使用
+                        </a>
+                    </h3>
+
+                    <div class="home-article-content markdown-body">
+                        
+                            
+                            NIO文档链接CSDN.  java NIO详解
+BIO使用Stream流读取数据，如字节流、字符流、打印流等。NIO的核心组件包括：Channel通道、Selector选择器、Buffer缓冲区
+ 
+
+java NIO在IO模式上，本质上是同步非阻塞+多路复用的组合，因此会有selector。selector是对select、poll、epoll的封装，用于管理每个Channel的事务发生...
+                        
+                    </div>
+
+                    <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fa-solid fa-calendars"></i>&nbsp;
+            <span class="home-article-date" data-date="Fri Dec 12 2025 22:48:35 GMT+0800">
+                
+                    2025-12-12
+                
+            </span>
+        </span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fa-solid fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/IO/">IO</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/NIO/">NIO</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/%E5%BC%82%E6%AD%A5/">异步</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2025/12/12/java-NIO%E7%AE%80%E8%BF%B0%E5%92%8C%E4%BD%BF%E7%94%A8/">阅读全文<span class="seo-reader-text">java NIO简述和使用</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
+</div>
+
+                </div>
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                
+
+                
+                <div class="flex flex-col gap-5 px-7 pb-7 pt-7">
+                    <h3 class="home-article-title">
+                        <a href="/2025/12/11/IO%E6%A8%A1%E5%9E%8B/">
+                            IO模型
+                        </a>
+                    </h3>
+
+                    <div class="home-article-content markdown-body">
+                        
+                            
+                            IOIO基本理解要求① IO 是什么（本质）② 阻塞模型（为什么会卡）③ 缓冲与流（为什么要包一层）④ IO 模型演进（BIO → NIO → AIO）⑤ IO 在后端中的真实使用方式
+IO是什么在计算机中，输入&#x2F;输出（即IO）是指信息处理系统（比如计算机）和外部世界（可以是人或其他信息处理系统）的通信。
+从计算机架构上来讲，任何涉及到计算机核心（CPU和内存）与其他设备间的数据转...
+                        
+                    </div>
+
+                    <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fa-solid fa-calendars"></i>&nbsp;
+            <span class="home-article-date" data-date="Thu Dec 11 2025 22:48:35 GMT+0800">
+                
+                    2025-12-11
+                
+            </span>
+        </span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fa-solid fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/IO/">IO</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2025/12/11/IO%E6%A8%A1%E5%9E%8B/">阅读全文<span class="seo-reader-text">IO模型</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
+</div>
+
+                </div>
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                
+
+                
+                <div class="flex flex-col gap-5 px-7 pb-7 pt-7">
+                    <h3 class="home-article-title">
+                        <a href="/2025/11/05/java-web%E6%A1%86%E6%9E%B6%E7%AE%80%E8%BF%B0/">
+                            java web框架简述
+                        </a>
+                    </h3>
+
+                    <div class="home-article-content markdown-body">
+                        
+                            
+                            Mybatis框架（持久层）Mybatis是ssm中的持久层框架，将SQL查询封装进对象，通过操作对象的方法执行SQL语句，是一款半自动ORM框架，而Hibernate则是一款全自动ORM框架。
+Mybatis基础配置与使用
+Mybatis配置文件mybatis-config.xml，这个文件中声明DTD文件路径，JDBC的数据库驱动类、url、用户名、密码等。
+DTD（文档类型定义）文件是...
+                        
+                    </div>
+
+                    <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fa-solid fa-calendars"></i>&nbsp;
+            <span class="home-article-date" data-date="Wed Nov 05 2025 00:51:59 GMT+0800">
+                
+                    2025-11-05
+                
+            </span>
+        </span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fa-solid fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/web/">web</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/%E6%A1%86%E6%9E%B6/">框架</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2025/11/05/java-web%E6%A1%86%E6%9E%B6%E7%AE%80%E8%BF%B0/">阅读全文<span class="seo-reader-text">java web框架简述</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
+</div>
+
+                </div>
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                
+
+                
+                <div class="flex flex-col gap-5 px-7 pb-7 pt-7">
+                    <h3 class="home-article-title">
+                        <a href="/2025/09/12/Javascript-%E5%9F%BA%E7%A1%80/">
+                            Javascript-基础
+                        </a>
+                    </h3>
+
+                    <div class="home-article-content markdown-body">
+                        
+                            
+                            JavaScript1. Js简单介绍
+JavaScript是一门解释性脚本语言，js的解释器被集成在浏览器中（浏览器内核可分：html渲染器和js解释器），Node.Js可在本地搭建的环境中运行，不依靠浏览器。
+
+Js定义 变量时，只有var、let、const关键字，不需要显式声明类型
+
+Js分为三部分：ECMAScript（Js版本，类似Java的JDK和C语言的不同标准如C11）、D...
+                        
+                    </div>
+
+                    <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fa-solid fa-calendars"></i>&nbsp;
+            <span class="home-article-date" data-date="Fri Sep 12 2025 21:41:47 GMT+0800">
+                
+                    2025-09-12
+                
+            </span>
+        </span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fa-solid fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/Javascript/">Javascript</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/%E5%9F%BA%E7%A1%80/">基础</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2025/09/12/Javascript-%E5%9F%BA%E7%A1%80/">阅读全文<span class="seo-reader-text">Javascript-基础</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
+</div>
+
+                </div>
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                
+
+                
+                <div class="flex flex-col gap-5 px-7 pb-7 pt-7">
+                    <h3 class="home-article-title">
+                        <a href="/2025/06/21/web%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/">
+                            web基础概念
+                        </a>
+                    </h3>
+
+                    <div class="home-article-content markdown-body">
+                        
+                            
+                            Nginx服务器Nginx：主流反向代理和分发静态资源服务器，减小web服务器压力
+正向代理：为客户端代理，客户端-&gt;代理服务器-&gt;服务器，由代理服务器中转，隐藏客户端IP地址 — VPN技术
+反向代理：为服务器代理，服务器-&gt;代理服务器-&gt;客户端，向服务器发送请求时，请求先发送到反向代理服务器，分发静态资源，再将请求转发到实际的服务器（或自主选择多服务器中的某个服务...
+                        
+                    </div>
+
+                    <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fa-solid fa-calendars"></i>&nbsp;
+            <span class="home-article-date" data-date="Sat Jun 21 2025 15:11:38 GMT+0800">
+                
+                    2025-06-21
+                
+            </span>
+        </span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fa-solid fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/%E5%9F%BA%E7%A1%80/">基础</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/web/">web</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2025/06/21/web%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/">阅读全文<span class="seo-reader-text">web基础概念</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
+</div>
+
+                </div>
+            </li>
+        
     </ul>
 
     <div class="home-paginator px-7 py-5">
@@ -574,7 +1006,7 @@ CountDownLatch简述CountDownLatch按照功能划分来说，应该叫做同步�
                 
                 <p class="post-count space-x-0.5">
                     <span>
-                        共撰写了 2 篇文章
+                        共撰写了 9 篇文章
                     </span>
                     
                 </p>

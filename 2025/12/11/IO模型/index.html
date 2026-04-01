@@ -78,7 +78,7 @@
     
     <!--- Seo Part-->
     
-    <link rel="canonical" href="http://example.com/2026/03/26/countdownlatch对aqs的使用/"/>
+    <link rel="canonical" href="http://example.com/2025/12/11/io模型/"/>
     <meta name="robots" content="index,follow">
     <meta name="googlebot" content="index,follow">
     <meta name="revisit-after" content="1 days">
@@ -87,18 +87,16 @@
         
         <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
 <meta property="og:type" content="article">
-<meta property="og:title" content="CountDownLatch对AQS的使用">
-<meta property="og:url" content="http://example.com/2026/03/26/CountDownLatch%E5%AF%B9AQS%E7%9A%84%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:title" content="IO模型">
+<meta property="og:url" content="http://example.com/2025/12/11/IO%E6%A8%A1%E5%9E%8B/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/images/redefine-og.webp">
-<meta property="article:published_time" content="2026-03-26T01:32:55.000Z">
-<meta property="article:modified_time" content="2026-03-26T17:07:33.742Z">
+<meta property="article:published_time" content="2025-12-11T14:48:35.000Z">
+<meta property="article:modified_time" content="2026-03-27T09:19:02.854Z">
 <meta property="article:author" content="John Doe">
-<meta property="article:tag" content="AQS">
-<meta property="article:tag" content="JUC">
-<meta property="article:tag" content="同步工具类">
+<meta property="article:tag" content="IO">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://example.com/images/redefine-og.webp">
     
@@ -112,7 +110,7 @@
     
     <title>
         
-            CountDownLatch对AQS的使用 | TC&#39;s Blog
+            IO模型 | TC&#39;s Blog
         
     </title>
 
@@ -301,7 +299,7 @@
 		<div class="article-title relative w-full">
 			
 			<div class="w-full flex items-center pt-6 justify-start">
-				<h1 class="article-title-regular text-second-text-color tracking-tight text-4xl md:text-6xl font-semibold px-2 sm:px-6 md:px-8 py-3">CountDownLatch对AQS的使用</h1>
+				<h1 class="article-title-regular text-second-text-color tracking-tight text-4xl md:text-6xl font-semibold px-2 sm:px-6 md:px-8 py-3">IO模型</h1>
 			</div>
 			
 		</div>
@@ -322,15 +320,15 @@
 					<div class="article-meta-info">
     <span class="article-date article-meta-item">
         <i class="fa-regular fa-pen-fancy"></i>&nbsp;
-        <span class="desktop">2026-03-26 09:32:55</span>
-        <span class="mobile">2026-03-26 09:32:55</span>
+        <span class="desktop">2025-12-11 22:48:35</span>
+        <span class="mobile">2025-12-11 22:48:35</span>
         <span class="hover-info">创建</span>
     </span>
     
         <span class="article-date article-meta-item">
             <i class="fa-regular fa-wrench"></i>&nbsp;
-            <span class="desktop">2026-03-27 01:07:33</span>
-            <span class="mobile">2026-03-27 01:07:33</span>
+            <span class="desktop">2026-03-27 17:19:02</span>
+            <span class="mobile">2026-03-27 17:19:02</span>
             <span class="hover-info">更新</span>
         </span>
     
@@ -342,15 +340,7 @@
             <ul>
                 
                     <li>
-                        <a href="/tags/JUC/">JUC</a>&nbsp;
-                    </li>
-                
-                    <li>
-                        | <a href="/tags/AQS/">AQS</a>&nbsp;
-                    </li>
-                
-                    <li>
-                        | <a href="/tags/%E5%90%8C%E6%AD%A5%E5%B7%A5%E5%85%B7%E7%B1%BB/">同步工具类</a>&nbsp;
+                        <a href="/tags/IO/">IO</a>&nbsp;
                     </li>
                 
             </ul>
@@ -376,70 +366,203 @@
 
 
 		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
-			<h2 id="大纲"><a href="#大纲" class="headerlink" title="大纲"></a>大纲</h2><ul>
-<li><a href="#%E5%A4%A7%E7%BA%B2">大纲</a></li>
-<li><a href="#countdownlatch%E7%AE%80%E8%BF%B0">CountDownLatch简述</a></li>
-<li><a href="#countdownlatch%E7%94%A8%E5%A4%84%E5%8F%8A%E7%94%A8%E6%B3%95">CountDownLatch用处及用法</a></li>
-<li><a href="#countdownlatch%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86">CountDownLatch的实现原理</a><ul>
-<li><a href="#countdownlatch%E4%B8%BB%E8%A6%81%E7%BB%93%E6%9E%84">CountDownLatch主要结构</a></li>
-<li><a href="#%E4%B8%BB%E8%A6%81%E6%96%B9%E6%B3%95%E5%AE%9E%E7%8E%B0">主要方法实现</a></li>
-<li><a href="#aqs%E7%9A%84%E7%8B%AC%E7%89%B9%E8%BF%90%E7%94%A8">AQS的独特运用</a></li>
-</ul>
-</li>
-</ul>
-<h2 id="CountDownLatch简述"><a href="#CountDownLatch简述" class="headerlink" title="CountDownLatch简述"></a>CountDownLatch简述</h2><p><code>CountDownLatch</code>按照功能划分来说，应该叫做同步工具类，虽然常常和ReentrantLock（锁）、ConcurrentHashMap（并发容器）等放在一起谈及，它们常常使用到一些共通的思想，但三者在功能和实现上有极大区别。</p>
-<p><code>CountDownLatch</code>用于阻塞一个或多个线程，并在满足条件（其他被等待的线程完成任务）时将这些线程全部唤醒，让被阻塞线程能够执行后续任务。</p>
-<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">举例：</span><br><span class="line">A、B、C一起赛跑，计时员需要阻塞等待三人到达，才能在纸上统计三人成绩。</span><br><span class="line">A体力更好，跑到终点时，B、C还在半路，此时等待人数减一。</span><br><span class="line">B到达后，还需要等待一个人。</span><br><span class="line">C到达后，三人全部到达，便唤醒了阻塞的计时员，被阻塞的计时员（可能有多个）一起执行后续任务（统计成绩）。</span><br></pre></td></tr></table></figure></div>
-
-<p>CountDownLatch基于AQS实现，继承了<code>AbstractQueuedSynchronizer</code>，上面例子中的<code>需要等待的人数</code>即AQS抽象类中的<code>state</code>。</p>
-<p><font color=red><code>CountDownLatch</code>似乎就是一个计数器？为什么不直接用原子类<code>AtomicIntrger</code>？</font></p>
-<p>因为CountDownLatch并不是只有计数器的作用，CountDownLatch同时还需要能够阻塞和唤醒线程。若使用原子类实现，则需要不停轮询来实现阻塞和唤醒，会浪费CPU，而使用CountDownLatch时，当需要阻塞时，可以直接调用await方法，进入等待队列，不会浪费CPU。</p>
-<h2 id="CountDownLatch用处及用法"><a href="#CountDownLatch用处及用法" class="headerlink" title="CountDownLatch用处及用法"></a>CountDownLatch用处及用法</h2><p>CountDownLatch最主要的用处即简述中提到的，“允许一个或多个线程等待，直到正在其他线程中进行的一组操作完成.”，让不同组的操作之间严格形成先后顺序，保证同步语序，有点类似于Volatile禁止指令重排序插入内存屏障的感觉。</p>
-<p><strong>CountDownLatch的用法</strong></p>
-<div class="code-container" data-rel="Java"><figure class="iseeu highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 10表示需要等待的线程数量</span></span><br><span class="line"><span class="type">CountDownLatch</span> <span class="variable">latch</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CountDownLatch</span>(<span class="number">10</span>);</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">Thread</span>(<span class="keyword">new</span> <span class="title class_">Runnable</span>() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="comment">// 线程完成任务</span></span><br><span class="line">            System.out.println(Thread.currentThread().getName() + <span class="string">&quot; working&quot;</span>);</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                <span class="comment">// 一个线程完成任务后调用countDown，等待线程数减一，判断是否唤醒队列中的线程</span></span><br><span class="line">                latch.countDown();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;).start();;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 主线程开始执行任务</span></span><br><span class="line">System.out.println(<span class="string">&quot;Main Thread starts to wait for other threads...&quot;</span>);</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// 调用await方法的线程主动被阻塞，直到state减小到0（5个子线程全部完成任务），被唤醒</span></span><br><span class="line">    latch.await();</span><br><span class="line">&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 执行后续任务</span></span><br><span class="line">System.out.println(<span class="string">&quot;Main Thread Finished&quot;</span>);</span><br></pre></td></tr></table></figure></div>
-
-<p>输出结果</p>
-<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Main Thread starts to wait for other threads...</span><br><span class="line">Thread-4 working</span><br><span class="line">Thread-0 working</span><br><span class="line">Thread-2 working</span><br><span class="line">Thread-3 working</span><br><span class="line">Thread-1 working</span><br><span class="line">Main Thread Finished</span><br></pre></td></tr></table></figure></div>
-
-<p>CountDownLatch最常用的方法就是<code>await</code>、<code>countDown</code>，分别实现等待和计数，掌握这两个方法在一般情况下就已经够用了。</p>
-<h2 id="CountDownLatch的实现原理"><a href="#CountDownLatch的实现原理" class="headerlink" title="CountDownLatch的实现原理"></a>CountDownLatch的实现原理</h2><h3 id="CountDownLatch主要结构"><a href="#CountDownLatch主要结构" class="headerlink" title="CountDownLatch主要结构"></a>CountDownLatch主要结构</h3><div class="code-container" data-rel="Java"><figure class="iseeu highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Sync sync;</span><br></pre></td></tr></table></figure></div>
-
-<p>CountDownLatch核心结构就是一个<code>Sync</code>，和<code>ReentrantLock</code>中的<code>Sync</code>一样，继承了AQS，所有逻辑、接口都是基于AQS的。</p>
-<p>总所周知，AQS是一个同时支持<code>独占模式</code>和<code>共享模式</code>的同步器，ReentrantLock使用的是独占模式，CountDownLatch则是共享模式。共享模式下，允许多个线程同时获取同步状态（即state到0后同时释放队列中的所有线程）并执行后续代码逻辑。</p>
-<div class="code-container" data-rel="Java"><figure class="iseeu highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Sync</span> <span class="keyword">extends</span> <span class="title class_">AbstractQueuedSynchronizer</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">serialVersionUID</span> <span class="operator">=</span> <span class="number">4982264981922014374L</span>;</span><br><span class="line"></span><br><span class="line">        Sync(<span class="type">int</span> count) &#123;</span><br><span class="line">            setState(count);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> <span class="title function_">getCount</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> getState();</span><br><span class="line">        &#125;</span><br><span class="line">		<span class="comment">// await中调用，若state为0，即等待的线程都已经到达</span></span><br><span class="line">        <span class="keyword">protected</span> <span class="type">int</span> <span class="title function_">tryAcquireShared</span><span class="params">(<span class="type">int</span> acquires)</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> (getState() == <span class="number">0</span>) ? <span class="number">1</span> : -<span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">		</span><br><span class="line">        <span class="keyword">protected</span> <span class="type">boolean</span> <span class="title function_">tryReleaseShared</span><span class="params">(<span class="type">int</span> releases)</span> &#123;</span><br><span class="line">            <span class="comment">// state减一，若已经到0，即要等待的线程都已经到达，则返回false</span></span><br><span class="line">            <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">                <span class="type">int</span> <span class="variable">c</span> <span class="operator">=</span> getState();</span><br><span class="line">                <span class="keyword">if</span> (c == <span class="number">0</span>)</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">                <span class="type">int</span> <span class="variable">nextc</span> <span class="operator">=</span> c - <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">if</span> (compareAndSetState(c, nextc))</span><br><span class="line">                    <span class="keyword">return</span> nextc == <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></div>
-
-<h3 id="主要方法实现"><a href="#主要方法实现" class="headerlink" title="主要方法实现"></a>主要方法实现</h3><p><code>await</code>流程</p>
-<!-- ![CountDownLatch_await.png](../images/CountDownlatch_await.png) -->
-<p><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/CountDownlatch_await.png"
-                      style="width:60%"
-                ></img> </p>
-<div class="code-container" data-rel="Java"><figure class="iseeu highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">    sync.acquireSharedInterruptibly(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// CountDownLatch中阻塞是可以打断的，被打断后抛出异常，若进入acquire被打断，同样会有应对措施</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title function_">acquireSharedInterruptibly</span><span class="params">(<span class="type">int</span> arg)</span></span><br><span class="line">    <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">    <span class="keyword">if</span> (Thread.interrupted() ||</span><br><span class="line">        (tryAcquireShared(arg) &lt; <span class="number">0</span> &amp;&amp;</span><br><span class="line">         acquire(<span class="literal">null</span>, arg, <span class="literal">true</span>, <span class="literal">true</span>, <span class="literal">false</span>, <span class="number">0L</span>) &lt; <span class="number">0</span>))</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">InterruptedException</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 直接对比state，若等于0则可以获取同步状态</span></span><br><span class="line"><span class="keyword">protected</span> <span class="type">int</span> <span class="title function_">tryAcquireShared</span><span class="params">(<span class="type">int</span> acquires)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> (getState() == <span class="number">0</span>) ? <span class="number">1</span> : -<span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// acquire源码在AQS部分简述，总之就是一个检查、尝试获取、入队、自旋、阻塞、退出的循环过程</span></span><br></pre></td></tr></table></figure></div>
-
-<p><code>countDown()</code>流程</p>
-<p><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/CountDownLatch_countDown.png"
-                      style="width:25%"
-                ></img> </p>
-<div class="code-container" data-rel="Java"><figure class="iseeu highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">countDown</span><span class="params">()</span> &#123;</span><br><span class="line">    sync.releaseShared(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// AQS中实现，state自减，判断是否减至0，若成功则可以唤醒阻塞线程</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="type">boolean</span> <span class="title function_">releaseShared</span><span class="params">(<span class="type">int</span> arg)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (tryReleaseShared(arg)) &#123;</span><br><span class="line">        signalNext(head);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Sync中实现，该方法不仅是state减一，其语义为是否state降低到0，若返回true，则可以唤醒了</span></span><br><span class="line"><span class="keyword">protected</span> <span class="type">boolean</span> <span class="title function_">tryReleaseShared</span><span class="params">(<span class="type">int</span> releases)</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">c</span> <span class="operator">=</span> getState();</span><br><span class="line">        <span class="comment">// 原本为0，，别人早就已经满足条件了，直接false</span></span><br><span class="line">        <span class="keyword">if</span> (c == <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        <span class="type">int</span> <span class="variable">nextc</span> <span class="operator">=</span> c - <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (compareAndSetState(c, nextc))</span><br><span class="line">            <span class="keyword">return</span> nextc == <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
-
-<h3 id="AQS的独特运用"><a href="#AQS的独特运用" class="headerlink" title="AQS的独特运用"></a>AQS的独特运用</h3><p>前面提到，CountDownLatch基于AQS实现，内部采用共享模式。因此在AQS的使用也和原本学习过的ReentrantLock有较大区别。下面列举一些两者在AQS上的相同和相异。</p>
+			<h1 id="IO"><a href="#IO" class="headerlink" title="IO"></a>IO</h1><h2 id="IO基本理解要求"><a href="#IO基本理解要求" class="headerlink" title="IO基本理解要求"></a>IO基本理解要求</h2><p>① IO 是什么（本质）<br>② 阻塞模型（为什么会卡）<br>③ 缓冲与流（为什么要包一层）<br>④ IO 模型演进（BIO → NIO → AIO）<br>⑤ IO 在后端中的真实使用方式</p>
+<h2 id="IO是什么"><a href="#IO是什么" class="headerlink" title="IO是什么"></a>IO是什么</h2><p>在计算机中，<strong>输入&#x2F;输出（即IO）是指信息处理系统（比如计算机）和外部世界（可以是人或其他信息处理系统）的通信。</strong></p>
+<p><em><strong>从计算机架构上来讲，任何涉及到计算机核心（CPU和内存）与其他设备间的数据转移的过程就是IO。</strong></em></p>
+<p>IO的主体是其应用程序的运行态，即进程，特别强调的是我们的应用程序其实并不存在实质的IO过程，真正的IO过程是操作系统的事情，这里把<strong>应用程序的IO操作分为两种动作：IO调用和IO执行</strong>。</p>
+<p>IO调用是由进程发起，IO执行是操作系统的工作。因此，更准确些来说，此时所说的IO是应用程序对操作系统IO功能的一次触发，即IO调用。</p>
+<p><strong>IO调用</strong></p>
+<p>以一个进程的输入类型的IO调用为例，它将完成或引起如下工作内容：</p>
 <ol>
-<li><p>在ReentrantLock中，state表示为一个线程的锁重入次数，state减到0后，其他线程才能获取。而CountDownLatch中，state表示等待线程数，state减到0后，阻塞的线程才能被唤醒并继续执行任务。</p>
-</li>
-<li><p>ReentrantLock核心思想是，各线程进行竞争，一个线程可以修改state，当其释放后其他线程重新竞争。</p>
-<p>CountDownLatch则是初始化时就显式设置了state的数值，可以理解为开局就给AQS添加了几把不一定由同一线程持有的锁，调用await的线程必须等待开局设置的几个锁被释放，才能获取同步状态执行任务</p>
-</li>
-<li><p>CountDownLatch的countDown方法中，不同线程会竞争state，并一次只有一个线程能够修改，这看起来似乎很像是<code>加锁</code>的过程，但恰恰相反，若一定要用“锁”的概念来理解，<code>countDown</code>等价于释放锁的过程。</p>
-<p>正因为开局就有多个线程“持锁”，所以原本的竞争“吃素”就变成了现在的竞争“释放锁”</p>
-</li>
-<li><p>await方法一看到就会联想到<code>Condition</code>的await，这个await确实也有进入等待队列的作用，但却不是条件队列，这个await更倾向于ReentrantLock中的lock，核心作用是等待条件达成，若条件还未达成，就阻塞等待唤醒。</p>
-</li>
+<li><strong>进程向操作系统请求外部数据</strong></li>
+<li><strong>操作系统将外部数据加载到内核缓冲区</strong></li>
+<li><strong>操作系统将数据从内核缓冲区拷贝到进程缓冲区</strong></li>
+<li><strong>进程读取数据继续后面的工作</strong></li>
 </ol>
+<p><strong>IO操作</strong></p>
+<p>网络IO为例子，一个read发生的事件：</p>
+<ol>
+<li><strong>socket.read()  进程询问是否有数据，若没有，则阻塞，等待系统通知</strong></li>
+<li><strong>网卡接收数据，将数据放在指定内存，发起硬打断（通知CPU）     （网卡-&gt;内核空间.内核缓存）</strong></li>
+<li><strong>硬打断很快（通知CPU、CPU记录），CPU获得通知后，继续完成当前任务，不切换上下文</strong></li>
+<li><strong>软打断，CPU空闲后，切换上下文，处理数据，分析是哪个进程的数据，通知对应进程     （内核缓存-&gt;内核空间.socket 缓存）</strong></li>
+<li><strong>CPU将数据从内核空间copy到用户空间   （socket 缓存-&gt;用户空间.用户缓存）</strong></li>
+</ol>
+<h2 id="同步、异步，堵塞、非堵塞"><a href="#同步、异步，堵塞、非堵塞" class="headerlink" title="同步、异步，堵塞、非堵塞"></a>同步、异步，堵塞、非堵塞</h2><p><strong>核心定义：两个维度的区别</strong></p>
+<p>我们可以把一个操作（比如读取文件、请求网络）看作是“调用者”和“被调用者”之间的互动。</p>
+<ul>
+<li><strong>同步 (Synchronous) &#x2F; 异步 (Asynchronous)</strong>：关注的是<strong>消息通知机制</strong>。<ul>
+<li><strong>同步</strong>：调用者主动等待结果。如果不返回结果，我就不干别的事。</li>
+<li><strong>异步</strong>：调用者发出请求后直接去做别的事。被调用者通过“回调”或“通知”来告知调用者结果。</li>
+</ul>
+</li>
+<li><strong>阻塞 (Blocking) &#x2F; 非阻塞 (Non-blocking)</strong>：关注的是<strong>调用者在等待时的状态</strong>。<ul>
+<li><strong>阻塞</strong>：在结果返回前，当前线程被挂起（卡住了），什么都干不了。</li>
+<li><strong>非阻塞</strong>：在结果返回前，当前线程不会被挂起，可以继续执行。</li>
+</ul>
+</li>
+</ul>
+<p>同步、异步表示：是否立刻返回		阻塞、非阻塞表示：是否挂起</p>
+<h3 id="总结对比表"><a href="#总结对比表" class="headerlink" title="总结对比表"></a>总结对比表</h3><table>
+<thead>
+<tr>
+<th><strong>组合方式</strong></th>
+<th><strong>调用者的状态</strong></th>
+<th><strong>如何得知结果</strong></th>
+<th><strong>效率评价</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>同步阻塞</strong></td>
+<td>挂起（卡住）</td>
+<td>直到拿到结果才返回</td>
+<td>简单，但吞吐量低</td>
+</tr>
+<tr>
+<td><strong>同步非阻塞</strong></td>
+<td>运行中</td>
+<td>主动轮询（不停地问）</td>
+<td>浪费 CPU 资源</td>
+</tr>
+<tr>
+<td><strong>异步阻塞</strong></td>
+<td>挂起（卡住）</td>
+<td>等待通知</td>
+<td>逻辑上存在，实际少用</td>
+</tr>
+<tr>
+<td><strong>异步非阻塞</strong></td>
+<td>运行中</td>
+<td>被动接收通知（回调）</td>
+<td><strong>性能巅峰</strong>，实现复杂</td>
+</tr>
+</tbody></table>
+<h2 id="五种IO模型"><a href="#五种IO模型" class="headerlink" title="五种IO模型"></a>五种IO模型</h2><h3 id="IO模型详解"><a href="#IO模型详解" class="headerlink" title="IO模型详解"></a>IO模型详解</h3><p><strong>1. 阻塞 I&#x2F;O (Blocking I&#x2F;O)</strong></p>
+<p>这是最常见的模型。当用户进程调用 <code>recvfrom</code> 等系统调用时，进程会进入阻塞状态，直到数据完全准备好并被拷贝到用户空间缓冲区。</p>
+<ul>
+<li><strong>特点</strong>：开发简单，但在处理多个连接时，需要为每个连接创建一个线程，资源开销大。</li>
+<li><strong>表现</strong>：两阶段全程阻塞。</li>
+</ul>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">从前有一条小河，河里有许多条鱼，一个叫张三的少年就很喜欢钓鱼，他带着自己的鱼竿就去钓鱼了，但张三这个人很固执，只要鱼没上钩，张三就一直等着，什么都不干，死死的盯着鱼漂，只有鱼漂动了，张三才会动，然后把鱼钓上来，钓上来之后，张三就又会重复之前的动作，一动不动的等待鱼儿上钩。</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>2. 非阻塞 I&#x2F;O (Non-blocking I&#x2F;O)</strong></p>
+<p>进程发起 I&#x2F;O 请求后，如果数据还没准备好，内核会立即返回一个错误（如 <code>EWOULDBLOCK</code>）。进程需要不断地轮询（Polling）内核，询问数据是否就绪。</p>
+<ul>
+<li><strong>特点</strong>：进程不会被挂起，可以执行其他任务，但轮询操作会大量消耗 CPU 资源。</li>
+<li><strong>表现</strong>：第一阶段非阻塞（但会持续询问），第二阶段（拷贝数据）仍然阻塞。</li>
+</ul>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">而此时走过来一个李四，李四这名少年也很喜欢钓鱼，但李四和张三不一样，李四左口袋装着《Linux高性能服务器编程》，右口袋装着一本《算法导论》，左手拿手机，右手拿了一根鱼竿，李四拿了钓鱼凳坐下之后，李四就开始钓鱼了，但李四不像张三一样，固执的死盯着鱼漂看，李四一会看会儿左口袋的书，一会玩会手机，一会儿又看算法导论，一会又看鱼漂，所以李四一直循环着前面的动作，直到循环到看鱼漂时，发现鱼漂已经动了好长时间了，此时李四就会把鱼儿钓上来，之后继续重复循环前面的动作。</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>3. I&#x2F;O 多路复用 (I&#x2F;O Multiplexing)</strong></p>
+<p>这是目前高并发网络服务器（如 Redis, Nginx）的核心。通过 <code>select</code>、<code>poll</code> 或 <code>epoll</code> 系统调用，一个线程可以监听多个文件描述符（FD）。当某个 FD 就绪时，才调用真正的 I&#x2F;O 操作。</p>
+<ul>
+<li><strong>特点</strong>：单个线程就能处理成千上万个连接。</li>
+<li><strong>表现</strong>：进程在调用 <code>select/epoll</code> 时阻塞，第一阶段其他时候非堵塞，但在处理具体数据拷贝时也非常高效。</li>
+</ul>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">此时又来了一个赵六的人，赵六和前面的三个人都不一样，赵六是个小土豪，赵六手里拿了一堆鱼竿，目测有几百根鱼竿，赵六到达河边，首先就把几百根鱼竿每隔几米插上去，总共插了好几百米的鱼竿，然后赵六就依次遍历这些鱼竿，哪个鱼竿上的鱼漂动了，赵六就把这根鱼竿上的鱼钓上来，然后接下来赵六就又继续重复之前遍历鱼竿的动作进行钓鱼了。</span><br></pre></td></tr></table></figure></div>
+
+<p>多路复用是现在IO模型中最主要采用的模型（Redis、Netty、Nginx）。</p>
+<p>多路复用和信号驱动都由系统返回一个通知，<font color='blue'><strong>但多路复用的核心作用多了一个“管家”，用于接收多个文件描述符FD的返回通知。并在进程唤醒后告知，线程进入非堵塞状态，处理所有返回的通知。</strong></font></p>
+<p><strong>这里的“进程在调用 <code>select/epoll</code> 时阻塞”，指的是查询的epoll线程阻塞，而原本的线程可以做其他事，这种方式更像信号驱动（多线程&#x2F;线程池做法，Nginx、Netty、Golang ）；</strong></p>
+<p><strong>或是调用epoll_wait后进入阻塞，有数据进入，epoll_wait返回，线程又变成非阻塞状态。这种单线程流派更像是<code>同步阻塞</code>（单线程做法，Redis、Node.Js）</strong></p>
+<p>用于托管FD的内核“管家”演进：<strong><code>select -&gt; poll -&gt; epoll</code></strong></p>
+<p><strong>4. 信号驱动 I&#x2F;O (Signal-driven I&#x2F;O)</strong></p>
+<p>进程预先向内核注册一个信号处理函数，然后立即返回，不阻塞。当内核准备好数据时，会发送一个信号（SIGIO）给进程，进程在信号处理函数中调用 I&#x2F;O 函数读取数据。</p>
+<ul>
+<li><strong>特点</strong>：在等待阶段不阻塞，但在收到信号后的数据拷贝阶段仍需阻塞。</li>
+<li><strong>应用</strong>：在实际开发中应用相对较少。</li>
+</ul>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">此时又来了一个王五少年，王五就拿着他自己的iphone14pro max和一根鱼竿外加一个铃铛，然后就来钓鱼了，王五把铃铛挂到鱼竿上，等鱼上钩的时候，铃铛就会响，王五根本不看鱼竿，就一直玩自己的iphone，等鱼上钩的时候，铃铛会自动响，王五此时再把鱼儿钓上来就好了，之后王五又继续重复前面的动作，只要铃铛不响，王五就一直玩手机，只有铃铛响了，王五才会把鱼钓上来。</span><br></pre></td></tr></table></figure></div>
+
+<p>信号驱动已经非常接近真正的异步，唯一的区别就在于还需要自己copy数据，即例子中王五需要自己提鱼钩</p>
+<p><strong>5. 异步 I&#x2F;O (Asynchronous I&#x2F;O)</strong></p>
+<p>这是真正的异步模型。用户进程调用 <code>aio_read</code> 后直接返回。内核会自动完成“等待数据”和“拷贝数据”这两个阶段，全部完成后才通知进程。</p>
+<ul>
+<li><strong>特点</strong>：效率最高，进程在整个过程中完全不阻塞。</li>
+<li><strong>表现</strong>：两阶段全异步。</li>
+</ul>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">然后又来了一个钱七，钱七比赵六还有钱，钱七是上市公司的CEO，钱七有自己的司机，钱七不喜欢钓鱼，但钱七喜欢吃鱼，所以钱七就把自己的司机留在了岸边，并且给了司机一个电话和一个桶，告诉司机，等你把鱼钓满一桶的时候，就给我打电话，然后我就从公司开车过来接你，所以钱七就直接开车回公司开什么股东大会去了，而他的司机就被留在这里继续钓鱼了。</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="同步和异步的根本区别"><a href="#同步和异步的根本区别" class="headerlink" title="同步和异步的根本区别"></a>同步和异步的根本区别</h3><p>同步和异步的根本区别在于：</p>
+<p><font color='red'>数据copy（内核到用户空间&#x2F;用户到内核）的过程必须中断（堵塞），由进程自己手动调用sendto()、recvfrom()，在此之前是可以和异步相同的。而异步是全部完成之后再通知进程</font></p>
+<p>而等待数据的过程，可以是非阻塞的，所以同步非阻塞的三种模型在第一阶段都可以非堵塞</p>
+<hr>
+<p><strong>五种模型对比表</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>模型</strong></th>
+<th><strong>第一阶段（等待数据）</strong></th>
+<th><strong>第二阶段（拷贝数据）</strong></th>
+<th><strong>I&#x2F;O 类型</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>阻塞 I&#x2F;O</strong></td>
+<td>阻塞</td>
+<td>阻塞</td>
+<td>同步</td>
+</tr>
+<tr>
+<td><strong>非阻塞 I&#x2F;O</strong></td>
+<td>非阻塞（轮询）</td>
+<td>阻塞</td>
+<td>同步</td>
+</tr>
+<tr>
+<td><strong>I&#x2F;O 多路复用</strong></td>
+<td>阻塞（仅在 select&#x2F;poll 上）&#x2F; 非堵塞</td>
+<td>阻塞</td>
+<td>同步</td>
+</tr>
+<tr>
+<td><strong>信号驱动 I&#x2F;O</strong></td>
+<td>非阻塞（通知）</td>
+<td>阻塞</td>
+<td>同步</td>
+</tr>
+<tr>
+<td><strong>异步 I&#x2F;O</strong></td>
+<td>非阻塞</td>
+<td>非阻塞</td>
+<td><strong>异步</strong></td>
+</tr>
+</tbody></table>
+<h2 id="IO模型、设计模式的对应"><a href="#IO模型、设计模式的对应" class="headerlink" title="IO模型、设计模式的对应"></a>IO模型、设计模式的对应</h2><p><strong>底层的 I&#x2F;O 模型</strong>（操作系统层面）与<strong>上层的设计模式</strong>（应用架构层面）之间的对应关系</p>
+<table>
+<thead>
+<tr>
+<th><strong>操作系统 I&#x2F;O 模型</strong></th>
+<th><strong>对应的网络编程设计模式</strong></th>
+<th><strong>典型代表 &#x2F; 库</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>阻塞 I&#x2F;O (BIO)</strong></td>
+<td><strong>Thread-per-connection</strong> (每连接一线程)</td>
+<td>早期的 Java BIO, Apache (Prefork)</td>
+</tr>
+<tr>
+<td><strong>非阻塞 I&#x2F;O (NIO)</strong></td>
+<td>无特定模式（通常作为轮询使用）</td>
+<td>很少直接作为架构模式</td>
+</tr>
+<tr>
+<td><strong>I&#x2F;O 多路复用</strong></td>
+<td><strong>Reactor 模式</strong></td>
+<td><strong>Redis, Netty, Nginx, Node.js</strong></td>
+</tr>
+<tr>
+<td><strong>信号驱动 I&#x2F;O</strong></td>
+<td>极少使用</td>
+<td>无主流模式</td>
+</tr>
+<tr>
+<td><strong>异步 I&#x2F;O (AIO)</strong></td>
+<td><strong>Proactor 模式</strong></td>
+<td><strong>Windows IOCP, Java AIO, Boost.Asio</strong></td>
+</tr>
+</tbody></table>
 
 		</div>
 
@@ -447,18 +570,18 @@
 		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
 			<div class="article-copyright-info-container">
     <ul>
-        <li><strong>标题:</strong> CountDownLatch对AQS的使用</li>
+        <li><strong>标题:</strong> IO模型</li>
         <li><strong>作者:</strong> tcole</li>
         <li><strong>创建于
-                :</strong> 2026-03-26 09:32:55</li>
+                :</strong> 2025-12-11 22:48:35</li>
         
             <li>
                 <strong>更新于
-                    :</strong> 2026-03-27 01:07:33
+                    :</strong> 2026-03-27 17:19:02
             </li>
         
         <li>
-            <strong>链接:</strong> https://tcole.github.io/2026/03/26/CountDownLatch对AQS的使用/
+            <strong>链接:</strong> https://tcole.github.io/2025/12/11/IO模型/
         </li>
         <li>
             <strong>
@@ -480,15 +603,7 @@
 		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
 			
 			<li class="tag-item mx-0.5">
-				<a href="/tags/JUC/">#JUC</a>&nbsp;
-			</li>
-			
-			<li class="tag-item mx-0.5">
-				<a href="/tags/AQS/">#AQS</a>&nbsp;
-			</li>
-			
-			<li class="tag-item mx-0.5">
-				<a href="/tags/%E5%90%8C%E6%AD%A5%E5%B7%A5%E5%85%B7%E7%B1%BB/">#同步工具类</a>&nbsp;
+				<a href="/tags/IO/">#IO</a>&nbsp;
 			</li>
 			
 		</ul>
@@ -500,12 +615,12 @@
 		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
 			
 			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
-				<a class="prev" rel="prev" href="/2026/03/27/java%E5%BC%82%E6%AD%A5%E7%9A%84%E4%B8%8D%E5%90%8C%E6%96%B9%E5%BC%8F/">
+				<a class="prev" rel="prev" href="/2025/12/12/java-NIO%E7%AE%80%E8%BF%B0%E5%92%8C%E4%BD%BF%E7%94%A8/">
 					<span class="left arrow-icon flex justify-center items-center">
 						<i class="fa-solid fa-chevron-left"></i>
 					</span>
 					<span class="title flex justify-center items-center">
-						<span class="post-nav-title-item truncate max-w-48">java异步的不同方式</span>
+						<span class="post-nav-title-item truncate max-w-48">java NIO简述和使用</span>
 						<span class="post-nav-item">上一篇</span>
 					</span>
 				</a>
@@ -513,9 +628,9 @@
 			
 			
 			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
-				<a class="next" rel="next" href="/2026/01/30/AQS%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
+				<a class="next" rel="next" href="/2025/11/05/java-web%E6%A1%86%E6%9E%B6%E7%AE%80%E8%BF%B0/">
 					<span class="title flex justify-center items-center">
-						<span class="post-nav-title-item truncate max-w-48">AQS深度解析</span>
+						<span class="post-nav-title-item truncate max-w-48">java web框架简述</span>
 						<span class="post-nav-item">下一篇</span>
 					</span>
 					<span class="right arrow-icon flex justify-center items-center">
@@ -598,8 +713,8 @@
 		<div class="post-toc-wrap">
 	<div class="post-toc">
 		<div class="toc-title">目录</div>
-		<div class="page-title">CountDownLatch对AQS的使用</div>
-		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%A7%E7%BA%B2"><span class="nav-text">大纲</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CountDownLatch%E7%AE%80%E8%BF%B0"><span class="nav-text">CountDownLatch简述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CountDownLatch%E7%94%A8%E5%A4%84%E5%8F%8A%E7%94%A8%E6%B3%95"><span class="nav-text">CountDownLatch用处及用法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CountDownLatch%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-text">CountDownLatch的实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CountDownLatch%E4%B8%BB%E8%A6%81%E7%BB%93%E6%9E%84"><span class="nav-text">CountDownLatch主要结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E6%96%B9%E6%B3%95%E5%AE%9E%E7%8E%B0"><span class="nav-text">主要方法实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AQS%E7%9A%84%E7%8B%AC%E7%89%B9%E8%BF%90%E7%94%A8"><span class="nav-text">AQS的独特运用</span></a></li></ol></li></ol>
+		<div class="page-title">IO模型</div>
+		<ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#IO"><span class="nav-text">IO</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#IO%E5%9F%BA%E6%9C%AC%E7%90%86%E8%A7%A3%E8%A6%81%E6%B1%82"><span class="nav-text">IO基本理解要求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IO%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-text">IO是什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E3%80%81%E5%BC%82%E6%AD%A5%EF%BC%8C%E5%A0%B5%E5%A1%9E%E3%80%81%E9%9D%9E%E5%A0%B5%E5%A1%9E"><span class="nav-text">同步、异步，堵塞、非堵塞</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%E5%AF%B9%E6%AF%94%E8%A1%A8"><span class="nav-text">总结对比表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E7%A7%8DIO%E6%A8%A1%E5%9E%8B"><span class="nav-text">五种IO模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IO%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3"><span class="nav-text">IO模型详解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E5%92%8C%E5%BC%82%E6%AD%A5%E7%9A%84%E6%A0%B9%E6%9C%AC%E5%8C%BA%E5%88%AB"><span class="nav-text">同步和异步的根本区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IO%E6%A8%A1%E5%9E%8B%E3%80%81%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%AF%B9%E5%BA%94"><span class="nav-text">IO模型、设计模式的对应</span></a></li></ol></li></ol>
 
 	</div>
 </div>
