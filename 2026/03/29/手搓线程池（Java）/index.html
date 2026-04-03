@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="Hexo Theme Redefine">
+    
+    
+    <meta name="author" content="tcole">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="http://example.com/2026/03/29/手搓线程池（java）/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="手搓线程池（Java）">
+<meta property="og:url" content="http://example.com/2026/03/29/%E6%89%8B%E6%90%93%E7%BA%BF%E7%A8%8B%E6%B1%A0%EF%BC%88Java%EF%BC%89/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-03-29T06:23:16.000Z">
+<meta property="article:modified_time" content="2026-03-29T08:25:20.193Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="JUC">
+<meta property="article:tag" content="线程池">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/tcole.ico" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/tcole.ico">
+    <meta name="theme-color" content="#A31F34">
+    <link rel="shortcut icon" href="/images/tcole.ico">
+    <!--- Page Info-->
+    
+    <title>
+        
+            手搓线程池（Java） | TC&#39;s Blog
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"example.com","root":"/","language":"zh-CN"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":true,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#A31F34","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":false,"family":null,"url":null},"title":{"enable":false,"family":null,"url":null}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":false,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":true,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"images/bf156c3b5fd0b43d7e87110321242b82391869011.png","dark":"images/3196b7d533022ec18ae22355291df52bd9d54fb2_raw.jpg"},"title":"sudo rm -rf /MyBrain","subtitle":{"text":["生鱼片是死鱼片。","“快点拉出来吧！”是一个祈屎句。","工人罢了工，所以成了人。"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#2C3E50","dark":"#fff"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":false,"style":"default","links":[{"icon":"fa-brands fa-github","url":null},{"icon":"fa-brands fa-twitter","url":null},{"icon":"fa-solid fa-at","url":"you@example.com"},{"icon":"fa-brands fa-telegram","url":null},{"icon":"/images/custom-icon.svg","url":null}],"qrs":[{"icon":"fa-brands fa-weixin","qr":null},{"icon":"/images/custom-icon.svg","qr":null}]}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1","theme":{"light":"default","dark":"dark"}}},"version":"2.9.0","navbar":{"auto_hide":false,"color":{"left":"#f78736","right":"#367df7","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"}},"search":{"enable":false,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur","masonry":{"batch_size":12,"initial_batch_size":24}},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":null,"show_on_mobile":true,"links":null},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footer":{"start":"2025/08/30 11:45:14","statistics":true,"customize":"<a href=\"https://ys.mihoyo.com\">你说的对，但是《原神》是由米哈游自主研发的一款全新开放世界冒险游戏。</a>","icp":{"enable":false,"number":null,"url":null}},"footerStart":"2025/08/30 11:45:14","mermaid":{"style":{"light":"default","dark":"dark"}}};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.i18n = {"search":"站内搜索您需要的内容...","toc":"目录","prev":"上一页","next":"下一页","prev_posts":"上一篇","next_posts":"下一篇","page":"第 %d 页","recent_posts":"最新文章","share":"分享","powered_by":"由 %s 驱动","theme":"主题","rss_feed":"RSS Feed","category":"分类","categories":"分类","tag":"标签","tags":"标签","post":"文章","posts":"文章","tagcloud":"标签云","comment":"评论","comments":"评论","top":"置顶","sticky":"置顶","go-back-home":"回到首页","masonry_loading":"照片加载中...","image_viewer":"图片查看器","close":"关闭","exif":{"title":"EXIF","cards":{"camera":"相机","lens":"镜头","exposure":"曝光","other":"其他"},"fields":{"make":"品牌","model":"机型","date_taken":"拍摄时间","lens_model":"镜头","focal_length":"焦距","focus_mode":"对焦模式","shutter":"快门","aperture":"光圈","iso":"感光度","exposure_program":"曝光程序","exposure_compensation":"曝光补偿","metering_mode":"测光模式","flash":"闪光灯","white_balance":"白平衡","latitude":"纬度","longitude":"经度","altitude":"海拔"},"status":{"loading":"加载中...","no_exif":"无 EXIF 信息","library_missing":"EXIF 库未加载","image_source_missing":"图片地址不可用","unavailable":"EXIF 不可用（可能被 CORS 阻止或缺少元数据）","flag_unavailable":"EXIF 不可用"}},"home":"首页","archive":"归档","archives":"归档","about":"关于","links":"链接","link":"链接","friends":"友情链接","friend":"友情链接","timeline":"时间轴","shuoshuo":"说说","bookmarks":"书签","site_uv":"访问人数","site_pv":"总访问量","read_more":"阅读全文","wordcount":"字","min2read":"分钟","changelog":"更新日志","status":"状态","runtime":"博客已运行","days":"天","hours":"小时","minutes":"分钟","seconds":"秒","optimized_by":"并由 Evan 进行优化","rights":"版权所有","site_posts":"共撰写了 %s 篇文章","site_wordcount":"共 %s 字","copyright":{"title":"标题","author":"作者","link":"链接","create_time":"创建于","update_time":"更新于","license_title":"版权声明","license_content":"本文章采用 %s 进行许可。","all_rights_reserved":"版权所有 &#169 %s，禁止转载。","public_domain":"本文为公有领域作品，可自由转载、引用。"},"ago":{"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"},"create_time":"创建","update_time":"更新","expired":"这篇文章最后更新于 %s 天前，内容可能已经过时。"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                TC&#39;s Blog
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">16</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">0</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">11</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			<div class="w-full flex items-center pt-6 justify-start">
+				<h1 class="article-title-regular text-second-text-color tracking-tight text-4xl md:text-6xl font-semibold px-2 sm:px-6 md:px-8 py-3">手搓线程池（Java）</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] shrink-0 rounded-medium border border-border-color p-px">
+				<img src="/images/daiwei.jpg">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">tcole</span>
+					
+					<span class="author-label ml-1.5 text-xs px-2 py-0.5 rounded-small text-third-text-color border border-shadow-color-1">Lv2</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-03-29 14:23:16</span>
+        <span class="mobile">2026-03-29 14:23:16</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-03-29 16:25:20</span>
+            <span class="mobile">2026-03-29 16:25:20</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/JUC/">JUC</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/">线程池</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+    
+    
+        <span class="article-pv article-meta-item">
+            <i class="fa-regular fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+        </span>
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<h1 id="手搓一个简单的线程池"><a href="#手搓一个简单的线程池" class="headerlink" title="手搓一个简单的线程池"></a>手搓一个简单的线程池</h1><p>本文仅记录从0到1手写一个最基本（简陋）线程池的过程，<strong>功能有阉割</strong>、<strong>逻辑不够完善</strong>、<strong>并发可能不够安全</strong>。</p>
+<h2 id="要实现的基本逻辑"><a href="#要实现的基本逻辑" class="headerlink" title="要实现的基本逻辑"></a>要实现的基本逻辑</h2><ul>
+<li>提交任务</li>
+<li>线程池关闭方法、运行状态</li>
+<li>任务队列、线程集合</li>
+<li>线程创建、调度</li>
+<li>拒绝策略</li>
+</ul>
+<h2 id="v1-0"><a href="#v1-0" class="headerlink" title="v1.0"></a>v1.0</h2><h3 id="实现线程池接口"><a href="#实现线程池接口" class="headerlink" title="实现线程池接口"></a>实现线程池接口</h3><p>一个线程池接口最基本的方法要包括：execute提交任务、shutdown关闭线程池、shutdownNow立即关闭。</p>
+<div class="code-container" data-rel="Java"><figure class="iseeu highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ExecutorService</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">execute</span><span class="params">()</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">shutdown</span><span class="params">()</span>;</span><br><span class="line">    </span><br><span class="line">    List&lt;Runnable&gt; <span class="title function_">shutdownNow</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="线程池类"><a href="#线程池类" class="headerlink" title="线程池类"></a>线程池类</h3><p>线程池类需要实现线程池接口，实现最基本的功能。</p>
+<h4 id="工作线程类"><a href="#工作线程类" class="headerlink" title="工作线程类"></a>工作线程类</h4><p>一个工作线程中，需要维护保存任务的阻塞队列，工作线程类需继承Thread，run方法重写为不断从该队列中获取任务并执行。</p>
+<div class="code-container" data-rel="Java"><figure class="iseeu highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Worker</span> <span class="keyword">extends</span> <span class="title class_">Thread</span> &#123;</span><br><span class="line">    <span class="comment">// 任务队列</span></span><br><span class="line">    <span class="keyword">private</span> BlockingQueue&lt;Runnable&gt; taskQueue;</span><br><span class="line">    <span class="comment">// 构造Worker</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Worker</span><span class="params">(BlockingQueue&lt;Runnable&gt; taskQueue)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.taskQueue = taskQueue;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">Runnable</span> <span class="variable">task</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">        <span class="keyword">while</span> (!Thread.currentThread().isInterrupted() &amp;&amp; (task = taskQueue.take()) != <span class="literal">null</span>) &#123;</span><br><span class="line">            task.run();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<h4 id="线程池类-1"><a href="#线程池类-1" class="headerlink" title="线程池类"></a>线程池类</h4><p>线程池类自身要实现的方法：构造方法、execute、shutdown、shutdownNow</p>
+<div class="code-container" data-rel="Java"><figure class="iseeu highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DemoThreadPool</span> <span class="keyword">implements</span> <span class="title class_">ExecutorService</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> BlockingQueue&lt;Runnable&gt; taskQueue;</span><br><span class="line">    <span class="keyword">private</span> List&lt;Worker&gt; workers;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="variable">isStopped</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> nThreads;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">DemoThreadPool</span><span class="params">(<span class="type">int</span> nThreads)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.nThreads = nThreads;</span><br><span class="line">        taskQueue = <span class="keyword">new</span> <span class="title class_">LinkedBlockingQueue</span>&lt;&gt;();</span><br><span class="line">        workers = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(nThreads);</span><br><span class="line">		<span class="comment">// 初始化时创建线程</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="built_in">this</span>.nThreads; i++) &#123;</span><br><span class="line">            <span class="type">var</span> <span class="variable">worker</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Worker</span>(taskQueue);</span><br><span class="line">            workers.add(worker);</span><br><span class="line">            worker.start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">execute</span><span class="params">(Runnable task)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (isStopped) <span class="keyword">return</span>;</span><br><span class="line">        taskQueue.offer(task);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">shutdown</span><span class="params">()</span> &#123;</span><br><span class="line">        isStopped = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">var</span> worker : workers) &#123;</span><br><span class="line">            worker.interrupt();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> List&lt;Runnable&gt; <span class="title function_">shutdownNow</span><span class="params">()</span> &#123;</span><br><span class="line">        isStopped = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">var</span> worker : workers) &#123;</span><br><span class="line">            worker.interrupt();</span><br><span class="line">        &#125;</span><br><span class="line">        List&lt;Runnable&gt; tasks = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">	    taskQueue.drainTo(tasks);</span><br><span class="line">        <span class="keyword">return</span> tasks;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>目前的线程池已经具有了 <code>execute提交Runnable任务</code>、<code>shutdown、shutdownNow关闭线程池</code>、<code>线程自动获取任务执行</code>的功能。同时，还存在以下缺陷：</p>
+<ul>
+<li>线程池中的线程只能在初始化线程池时被创建，不能在运行时创建</li>
+<li>线程池缺少大量关键属性：核心线程数、最大线程数、任务队列大小、核心线程是否超时</li>
+<li>线程池execute逻辑缺失：根据线程数的情况判断是否创建线程、入队等</li>
+<li>线程的超时机制缺失，getTask中使用take阻塞获取。</li>
+</ul>
+<h2 id="v2-0"><a href="#v2-0" class="headerlink" title="v2.0"></a>v2.0</h2><h3 id="Worker线程类改造"><a href="#Worker线程类改造" class="headerlink" title="Worker线程类改造"></a>Worker线程类改造</h3><p>原来的Worker中缺少接收创建线程时的<code>第一个任务</code>变量，无法实现创建时传入任务的效果。同时修改getTask方法逻辑，实现超时机制。</p>
+<div class="code-container" data-rel="Java"><figure class="iseeu highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">class</span> <span class="title class_">Worker</span> <span class="keyword">extends</span> <span class="title class_">Thread</span> &#123;</span><br><span class="line">        <span class="comment">// 任务队列</span></span><br><span class="line">        <span class="keyword">private</span> BlockingQueue&lt;Runnable&gt; taskQueue;</span><br><span class="line">        <span class="comment">// 第一个任务</span></span><br><span class="line">        <span class="keyword">private</span> Runnable firstTask;</span><br><span class="line">        <span class="comment">// 构造Worker</span></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">Worker</span><span class="params">(BlockingQueue&lt;Runnable&gt; taskQueue, Runnable firstTask)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.taskQueue = taskQueue;</span><br><span class="line">            <span class="built_in">this</span>.firstTask = firstTask;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="type">Runnable</span> <span class="variable">task</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">// 未被打断、未终止线程池、有传入任务或getTask获取到任务。三个条件满足才run</span></span><br><span class="line">                <span class="keyword">while</span> (!Thread.currentThread().isInterrupted() &amp;&amp; !isStopped &amp;&amp; (firstTask != <span class="literal">null</span> ||  (task = getTask()) != <span class="literal">null</span>)) &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        <span class="keyword">if</span> (firstTask != <span class="literal">null</span>) &#123;</span><br><span class="line">                            task = firstTask;</span><br><span class="line">                            firstTask = <span class="literal">null</span>;</span><br><span class="line">                        &#125;</span><br><span class="line">                        task.run();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Exception e) &#123;&#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                <span class="comment">// 若run方法执行完毕，该工作线程要注销，从workers工作线程列表删除。</span></span><br><span class="line">                <span class="keyword">synchronized</span> (workers) &#123;</span><br><span class="line">                    workers.remove(<span class="built_in">this</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> Runnable <span class="title function_">getTask</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="type">Runnable</span> <span class="variable">task</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">            <span class="comment">// 是否已经超时过一次</span></span><br><span class="line">            <span class="type">boolean</span> <span class="variable">lastTimeOut</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">                <span class="keyword">if</span> (isStopped) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 本轮次是否超时</span></span><br><span class="line">                <span class="type">boolean</span> <span class="variable">timeOut</span> <span class="operator">=</span> isCoreThreadTimeout || workers.size() &gt; maxCoreThread;</span><br><span class="line">			   <span class="comment">// 若本轮需要超时，且已经超时，则退出</span></span><br><span class="line">                <span class="keyword">if</span> (timeOut &amp;&amp; lastTimeOut) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 根据是否超时使用不同方法</span></span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    task = timeOut ? taskQueue.poll(<span class="number">10</span>, TimeUnit.SECONDS) : taskQueue.take();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                    <span class="keyword">if</span> (task != <span class="literal">null</span>) &#123;</span><br><span class="line">                        <span class="keyword">return</span> task;</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        <span class="comment">// 若没有获取到（只有poll方法或被打断才可能获取不到），设置超时标志，进入下一轮</span></span><br><span class="line">                        lastTimeOut = <span class="literal">true</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="核心线程数等关键属性"><a href="#核心线程数等关键属性" class="headerlink" title="核心线程数等关键属性"></a>核心线程数等关键属性</h3><div class="code-container" data-rel="Java"><figure class="iseeu highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DemoThreadPool</span> <span class="keyword">implements</span> <span class="title class_">ExecutorService</span> &#123;</span><br><span class="line">    <span class="comment">// 任务队列</span></span><br><span class="line">    <span class="keyword">private</span> BlockingQueue&lt;Runnable&gt; taskQueue;</span><br><span class="line">    <span class="comment">// 工作线程列表</span></span><br><span class="line">    <span class="keyword">private</span> List&lt;Worker&gt; workers;</span><br><span class="line">    <span class="comment">// 线程池是否停止</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="type">boolean</span> <span class="variable">isStopped</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="comment">// 线程池初始线程数</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> initThreadNum;</span><br><span class="line">    <span class="comment">// 最大核心线程数</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> maxCoreThread;</span><br><span class="line">    <span class="comment">// 最大线程数</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> maxThread;</span><br><span class="line">    <span class="comment">// 核心线程超时</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> isCoreThreadTimeout;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">DemoThreadPool</span><span class="params">(<span class="type">int</span> initThreadNum, <span class="type">int</span> maxCoreThread, <span class="type">int</span> maxThread, <span class="type">int</span> taskQueueSize, <span class="type">boolean</span> isCoreThreadTimeout)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.initThreadNum = initThreadNum;</span><br><span class="line">        <span class="built_in">this</span>.maxCoreThread = maxCoreThread;</span><br><span class="line">        <span class="built_in">this</span>.maxThread = maxThread;</span><br><span class="line">        <span class="built_in">this</span>.isCoreThreadTimeout = isCoreThreadTimeout;</span><br><span class="line">		<span class="comment">// 指定任务队列大小</span></span><br><span class="line">        taskQueue = <span class="keyword">new</span> <span class="title class_">LinkedBlockingQueue</span>&lt;&gt;(taskQueueSize);</span><br><span class="line">        workers = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(initThreadNum);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="built_in">this</span>.initThreadNum; i++) &#123;</span><br><span class="line">            <span class="type">var</span> <span class="variable">worker</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Worker</span>(taskQueue);</span><br><span class="line">            workers.add(worker);</span><br><span class="line">            worker.start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">execute</span><span class="params">(Runnable task)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">while</span> (!isStopped) &#123;</span><br><span class="line">            <span class="comment">// 线程数小于核心线程数，创建线程</span></span><br><span class="line">            <span class="keyword">if</span> (workers.size() &lt; maxCoreThread) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!addWorker(task)) <span class="keyword">continue</span>;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">                <span class="comment">// 否则进入任务队列</span></span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!taskQueue.offer(task)) &#123;</span><br><span class="line">                <span class="comment">// 进入失败（队列已满）</span></span><br><span class="line">                <span class="comment">// 若线程数小于最大线程数，创建非核心线程</span></span><br><span class="line">                <span class="keyword">if</span> (workers.size() &lt; maxThread) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (!addWorker(task)) <span class="keyword">continue</span>;</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">SizeException</span>(<span class="string">&quot;Task Queue Fulled And Thread Max&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">StatusException</span>(<span class="string">&quot;Thread Pool Closed&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// ......省略shutdown、shutdownNow</span></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">addWorker</span><span class="params">(Runnable task)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">while</span> (!isStopped) &#123;</span><br><span class="line">            <span class="comment">// 若还没达最大线程数</span></span><br><span class="line">            <span class="keyword">if</span> (workers.size() &lt; maxThread) &#123;</span><br><span class="line">                <span class="comment">// 加锁修改workers</span></span><br><span class="line">                <span class="keyword">synchronized</span> (workers) &#123;</span><br><span class="line">                    <span class="comment">// 再次判断</span></span><br><span class="line">                    <span class="keyword">if</span> (workers.size() &gt;= maxThread &amp;&amp; !isStop) <span class="keyword">continue</span>;</span><br><span class="line">                    <span class="type">var</span> <span class="variable">worker</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Worker</span>(taskQueue, task);</span><br><span class="line">                    workers.add(worker);</span><br><span class="line">                    worker.start();</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">StatusException</span>(<span class="string">&quot;Thread Pool Closed&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p>此时优化后的线程池已具备创建线程、任务提交与领取、线程生命管理等逻辑。但，还缺少：</p>
+<ul>
+<li>Ctl实现的（Running、Shutdown、Stop等）状态机</li>
+<li>Callable &amp; Future支持，获取返回值</li>
+<li>shutdown、shutdownNow逻辑优化</li>
+<li>拒绝策略、阻塞队列、空闲（超时）时间参数传入等</li>
+</ul>
+<h2 id="v2-5"><a href="#v2-5" class="headerlink" title="v2.5"></a>v2.5</h2><p>前面已经说过，本文实现的只是一个简陋的线程池实现，所以，在v2.5中，我只会再添加拒绝策略的实现，阻塞队列、超时时间、Callable、状态机流转不具体实现。</p>
+<h3 id="拒绝策略"><a href="#拒绝策略" class="headerlink" title="拒绝策略"></a>拒绝策略</h3><h4 id="拒绝策略接口"><a href="#拒绝策略接口" class="headerlink" title="拒绝策略接口"></a>拒绝策略接口</h4><div class="code-container" data-rel="Java"><figure class="iseeu highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">RejectedExecutorHandler</span> &#123;</span><br><span class="line"> 	<span class="comment">// 该接口只有一个方法，用于实现不同逻辑。</span></span><br><span class="line">    <span class="comment">// 参数为被拒绝的任务、线程池对象（用于重试等）</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">rejectedExecution</span><span class="params">(Runnable task, ExecutorService executor)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<h4 id="不同实现"><a href="#不同实现" class="headerlink" title="不同实现"></a>不同实现</h4><p>拒绝策略：抛出异常</p>
+<div class="code-container" data-rel="Java"><figure class="iseeu highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AbortPolicy</span> <span class="keyword">implements</span> <span class="title class_">RejectedExecutorHandler</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">rejectedExecution</span><span class="params">(Runnable task, ExecutorService executor)</span> &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(<span class="string">&quot;Task No.&quot;</span> + ((Task) task).getId() + <span class="string">&quot; rejected. &quot;</span> + <span class="string">&quot;RejectedHandler: &quot;</span> + <span class="built_in">this</span>.getClass().getSimpleName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<p>拒绝策略：丢弃</p>
+<div class="code-container" data-rel="Java"><figure class="iseeu highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DiscardPolicy</span> <span class="keyword">implements</span> <span class="title class_">RejectedExecutorHandler</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">rejectedExecution</span><span class="params">(Runnable task, ExecutorService executor)</span> &#123;</span><br><span class="line">        <span class="comment">// 直接丢弃任务，不抛出异常</span></span><br><span class="line">        System.out.println(<span class="string">&quot;Task No.&quot;</span> + ((Task) task).getId() + <span class="string">&quot; discarded. RejectedHandler: &quot;</span> + <span class="built_in">this</span>.getClass().getSimpleName());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<p>拒绝策略：重试</p>
+<div class="code-container" data-rel="Java"><figure class="iseeu highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TryAgainPolicy</span> <span class="keyword">implements</span> <span class="title class_">RejectedExecutorHandler</span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">rejectedExecution</span><span class="params">(Runnable task, ExecutorService executor)</span> &#123;</span><br><span class="line">        BlockingQueue&lt;Runnable&gt; workQueue = ((DemoThreadPool) executor).getWorkQueue();</span><br><span class="line">        <span class="comment">// 从线程池获取任务队列</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 被拒绝的情况为：任务队列满、线程数达最大。execute类似于忙等待（不断poll进任务队列），为了避免，使用put</span></span><br><span class="line">            workQueue.put(task);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure></div>
+
+<h4 id="线程池类修改"><a href="#线程池类修改" class="headerlink" title="线程池类修改"></a>线程池类修改</h4><p>通过构造方法传入拒绝策略</p>
+<div class="code-container" data-rel="Java"><figure class="iseeu highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">public</span> <span class="title function_">DemoThreadPool</span><span class="params">(<span class="type">int</span> initThreadNum, <span class="type">int</span> maxCoreThread, <span class="type">int</span> maxThread, <span class="type">int</span> taskQueueSize, RejectedExecutorHandler rejectedHandler, <span class="type">boolean</span> isCoreThreadTimeout)</span> &#123;</span><br><span class="line">		<span class="comment">// ......</span></span><br><span class="line">     </span><br><span class="line">        <span class="built_in">this</span>.rejectedHandler = rejectedHandler;</span><br><span class="line">     </span><br><span class="line">		<span class="comment">// .......</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<p>execute方法修改</p>
+<div class="code-container" data-rel="Java"><figure class="iseeu highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">execute</span><span class="params">(Runnable task)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="keyword">while</span> (!isStopped) &#123;</span><br><span class="line">        <span class="keyword">if</span> (workers.size() &lt; maxCoreThread) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!addWorker(task)) <span class="keyword">continue</span>;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!taskQueue.offer(task)) &#123;</span><br><span class="line">            <span class="keyword">if</span> (workers.size() &lt; maxThread) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!addWorker(task)) <span class="keyword">continue</span>;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// 由原来的报错改为执行拒绝策略的拒绝方法</span></span><br><span class="line">                rejectedHandler.rejectedExecution(task, <span class="built_in">this</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">StatusException</span>(<span class="string">&quot;Thread Pool Closed&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h2><div class="code-container" data-rel="Java"><figure class="iseeu highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">test</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="comment">// 初始两个线程，核心线程数4，最大线程数8，任务队列长度10，重试拒绝策略，核心线程不允许超时</span></span><br><span class="line">        <span class="type">ExecutorService</span> <span class="variable">executor</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DemoThreadPool</span>(<span class="number">2</span>, <span class="number">4</span>, <span class="number">8</span>, <span class="number">10</span>, <span class="keyword">new</span> <span class="title class_">TryAgainPolicy</span>(), <span class="literal">false</span>);</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">20</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="type">var</span> <span class="variable">task</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Task</span>(i, <span class="keyword">new</span> <span class="title class_">Runnable</span>() &#123;</span><br><span class="line">                    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            Thread.sleep((<span class="type">int</span>)(Math.random() * <span class="number">1000</span>));</span><br><span class="line">                        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                            e.printStackTrace();</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">                executor.execute(task);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                <span class="comment">// e.printStackTrace();</span></span><br><span class="line">                System.out.println(<span class="string">&quot;Task No.&quot;</span> + i + <span class="string">&quot; rejected&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<p>输出结果：</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">Task No.1 finished by Thread-3</span><br><span class="line">Task No.14 finished by Thread-5</span><br><span class="line">Task No.2 finished by Thread-0</span><br><span class="line">Task No.5 finished by Thread-5</span><br><span class="line">Task No.7 finished by Thread-5</span><br><span class="line">Task No.0 finished by Thread-2</span><br><span class="line">Task No.8 finished by Thread-5</span><br><span class="line">Task No.4 finished by Thread-3</span><br><span class="line">Task No.11 finished by Thread-3</span><br><span class="line">Task No.9 finished by Thread-2</span><br><span class="line">Task No.3 finished by Thread-1</span><br><span class="line">Task No.16 finished by Thread-6</span><br><span class="line">Task No.6 finished by Thread-0</span><br><span class="line">Task No.17 finished by Thread-7</span><br><span class="line">Task No.15 finished by Thread-2</span><br><span class="line">Task No.12 finished by Thread-4</span><br><span class="line">Task No.18 finished by Thread-1</span><br><span class="line">Task No.13 finished by Thread-3</span><br><span class="line">Task No.10 finished by Thread-5</span><br><span class="line">Task No.19 finished by Thread-6</span><br></pre></td></tr></table></figure></div>
+
+<h2 id="总结-2"><a href="#总结-2" class="headerlink" title="总结"></a>总结</h2><p>从最开始只能固定线程数、任务队列无限制存放，到逐步改bug，加入线程生命周期、拒绝策略等部分，至此，这个线程池能够完成一些情况下的任务提交、处理。</p>
+<p>当然，现在的线程池还缺少很多内容，如v2.0总结中提到的<code>Callable &amp; Future</code>、<code>状态机</code>等，真正的线程池会远比我们自己实现的线程池更加复杂、强大。</p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> 手搓线程池（Java）</li>
+        <li><strong>作者:</strong> tcole</li>
+        <li><strong>创建于
+                :</strong> 2026-03-29 14:23:16</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-03-29 16:25:20
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://tcole.github.io/2026/03/29/手搓线程池（Java）/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/JUC/">#JUC</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/">#线程池</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/04/03/MySQL%E8%BF%9B%E9%98%B6%E7%AC%94%E8%AE%B0-Day1/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">MySQL进阶笔记 Day1</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/03/27/java%E5%BC%82%E6%AD%A5%E7%9A%84%E4%B8%8D%E5%90%8C%E6%96%B9%E5%BC%8F/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">java异步的不同方式</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+		<div class="comment-container px-2 sm:px-6 md:px-8 pb-8">
+			<div class="comments-container mt-10 w-full ">
+    <div id="comment-anchor" class="w-full h-2.5"></div>
+    <div class="comment-area-title w-full my-1.5 md:my-2.5 text-xl md:text-3xl font-bold">
+        评论
+    </div>
+    
+
+        
+            
+    <div id="waline"></div>
+    <script type="module" data-swup-reload-script>
+      import { init } from '/js/libs/waline.js';
+
+      (function() {
+        const startPath = location.pathname;
+        const startTime = Date.now();
+        const retryDelay = 200;
+        const retryLimit = 5000;
+
+        const runWaline = () => {
+          if (location.pathname !== startPath) {
+            return;
+          }
+
+          const container = document.getElementById('waline');
+          if (!container) {
+            if (Date.now() - startTime < retryLimit) {
+              setTimeout(runWaline, retryDelay);
+            }
+            return;
+          }
+
+          if (window.redefineWalineInstance?.destroy) {
+            window.redefineWalineInstance.destroy();
+          }
+
+          container.innerHTML = '';
+          window.redefineWalineInstance = init({
+            el: '#waline',
+            serverURL: 'https://example.example.com',
+            path: location.pathname,
+            dark: 'body[class~="dark-mode"]',
+            reaction: false,
+            requiredMeta: ['nick', 'mail'],
+            emoji: [],
+                      lang: 'zh-CN',
+          });
+        };
+
+        runWaline();
+      })();
+    </script>
+
+
+
+        
+    
+</div>
+
+		</div>
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">手搓线程池（Java）</div>
+		<ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%89%8B%E6%90%93%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="nav-text">手搓一个简单的线程池</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A6%81%E5%AE%9E%E7%8E%B0%E7%9A%84%E5%9F%BA%E6%9C%AC%E9%80%BB%E8%BE%91"><span class="nav-text">要实现的基本逻辑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#v1-0"><span class="nav-text">v1.0</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%8E%A5%E5%8F%A3"><span class="nav-text">实现线程池接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%B1%BB"><span class="nav-text">线程池类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#v2-0"><span class="nav-text">v2.0</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Worker%E7%BA%BF%E7%A8%8B%E7%B1%BB%E6%94%B9%E9%80%A0"><span class="nav-text">Worker线程类改造</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E7%BA%BF%E7%A8%8B%E6%95%B0%E7%AD%89%E5%85%B3%E9%94%AE%E5%B1%9E%E6%80%A7"><span class="nav-text">核心线程数等关键属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#v2-5"><span class="nav-text">v2.5</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%92%E7%BB%9D%E7%AD%96%E7%95%A5"><span class="nav-text">拒绝策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81"><span class="nav-text">验证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-2"><span class="nav-text">总结</span></a></li></ol></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+            <div class="customize-info my-1"><a target="_blank" rel="noopener" href="https://ys.mihoyo.com">你说的对，但是《原神》是由米哈游自主研发的一款全新开放世界冒险游戏。</a></div>
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2025</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-regular fa-computer-classic"></i>&nbsp;&nbsp;<a href="/">tcole</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 11 篇文章
+                    </span>
+                    
+                </p>
+            
+        </div>
+        
+            <script data-swup-reload-script src="https://cn.vercount.one/js"></script>
+            <div class="relative text-center lg:absolute lg:right-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-right">
+                
+                    <span id="busuanzi_container_site_uv" class="lg:!block">
+                        <span class="text-sm">访问人数</span>
+                        <span id="busuanzi_value_site_uv"></span>
+                    </span>
+                
+                
+                    <span id="busuanzi_container_site_pv" class="lg:!block">
+                        <span class="text-sm">总访问量</span>
+                        <span id="busuanzi_value_site_pv"></span>
+                    </span>
+                
+            </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.9.0</a></span>
+        </div>
+        
+        
+        
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+		<li class="go-comment">
+			<i class="fa-regular fa-comments"></i>
+		</li>
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container" role="dialog" aria-modal="true" aria-label="图片查看器">
+	<button class="image-viewer-close" type="button" aria-label="关闭">
+		<i class="fa-solid fa-xmark"></i>
+	</button>
+	<button class="image-viewer-prev" type="button" aria-label="上一页">
+		<i class="fa-solid fa-chevron-left"></i>
+	</button>
+	<div class="image-viewer-frame">
+		<img src="" alt="">
+	</div>
+	<div class="image-viewer-exif-panel hidden absolute left-1/2 bottom-20 -translate-x-1/2 w-[min(92vw,420px)] max-h-[60vh] overflow-hidden rounded-2xl bg-background-color-transparent-80 p-4 text-left shadow-redefine-flat backdrop-blur-md" role="dialog" aria-label="EXIF" aria-hidden="true">
+		<div class="flex items-center justify-between mb-3">
+			<span class="text-sm font-semibold text-first-text-color">EXIF</span>
+			<button class="image-viewer-exif-close flex h-8 w-8 items-center justify-center rounded-full bg-background-color-transparent-80 text-first-text-color transition hover:bg-background-color-transparent-40" type="button" aria-label="关闭">
+				<i class="fa-solid fa-xmark text-[0.65rem]"></i>
+			</button>
+		</div>
+		<div class="image-viewer-exif-cards grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1 scrollbar-hide"></div>
+		<template class="image-viewer-exif-card-template">
+			<div class="rounded-lg bg-background-color-transparent-40 px-3 py-2">
+				<div class="image-viewer-exif-card-header flex items-center gap-2 mb-1">
+					<i class="image-viewer-exif-card-icon fa-solid fa-circle-info text-xs text-third-text-color"></i>
+					<div class="image-viewer-exif-card-title text-xs font-semibold text-first-text-color"></div>
+				</div>
+				<div class="image-viewer-exif-card-items flex flex-col gap-1"></div>
+			</div>
+		</template>
+	</div>
+	<button class="image-viewer-exif-toggle flex items-center gap-2 hidden absolute left-1/2 bottom-6 -translate-x-1/2 rounded-full border border-border-color bg-background-color-transparent-80 px-4 py-2 text-first-text-color backdrop-blur-md transition hover:bg-background-color-transparent-40" type="button" aria-label="EXIF" aria-expanded="false">
+		<i class="fa-solid fa-circle-info text-xs"></i>
+		<span class="text-xs font-semibold uppercase tracking-wider">EXIF</span>
+	</button>
+	<button class="image-viewer-next" type="button" aria-label="下一页">
+		<i class="fa-solid fa-chevron-right"></i>
+	</button>
+</div>
+
+
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    window.swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+
+    window.dispatchEvent(
+        new CustomEvent("redefine:swup:ready", {
+            detail: {
+                swup: window.swup,
+            },
+        }),
+    );
+</script>
+
+
+
+
+	
+<script src="/js/build/main.js" type="module"></script>
+
+
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+
+	
+</body>
+
+</html>
