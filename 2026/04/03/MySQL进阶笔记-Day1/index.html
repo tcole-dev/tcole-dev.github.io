@@ -94,7 +94,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/images/redefine-og.webp">
 <meta property="article:published_time" content="2026-04-03T15:33:48.000Z">
-<meta property="article:modified_time" content="2026-04-03T15:35:07.264Z">
+<meta property="article:modified_time" content="2026-04-04T02:24:56.441Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="数据库">
 <meta property="article:tag" content="笔记">
@@ -277,7 +277,7 @@
         <div class="label text-third-text-color text-sm">分类</div>
     </a>
     <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
-        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">11</div>
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">12</div>
         <div class="label text-third-text-color text-sm">文章</div>
     </a>
 </div>
@@ -328,8 +328,8 @@
     
         <span class="article-date article-meta-item">
             <i class="fa-regular fa-wrench"></i>&nbsp;
-            <span class="desktop">2026-04-03 23:35:07</span>
-            <span class="mobile">2026-04-03 23:35:07</span>
+            <span class="desktop">2026-04-04 10:24:56</span>
+            <span class="mobile">2026-04-04 10:24:56</span>
             <span class="hover-info">更新</span>
         </span>
     
@@ -385,6 +385,57 @@
 
 <p>最主要的就是redo log（prepare） -&gt; binlog -&gt; redo log（commit）。若数据库崩溃，重启时会进行如下检查和操作：</p>
 <p>若redo log为commit，说明已经写入binlog，可以直接提交；若redo log为prepare，binlog可能还没写入，则直接回滚。这种方式是确保两条日志一致，不会出现通过redo log恢复但binlog没有导致无法迁移、binlog中已存在但崩溃后无法通过redo log恢复 的情况。</p>
+<h2 id="索引数据结构"><a href="#索引数据结构" class="headerlink" title="索引数据结构"></a>索引数据结构</h2><p>B+树、B树、Hash</p>
+<p>B树（B-树）、B+树都是平衡多路查找树，一个节点可存储多个key或key-value。</p>
+<ul>
+<li><p>平衡：B&#x2F;B+树严格要求所有叶子节点都在同一层，当一个节点满时，节点会从中间分裂成两个子树，中间元素推到父节点</p>
+</li>
+<li><p>多路：B&#x2F;B+树不是二叉树，一个节点可能有多个子树，这种结构让树结构更低，每一层存储数据更多，搜索效率更高</p>
+</li>
+<li><p>查找：B&#x2F;B+树依然遵守左 &lt; 中 &lt; 右 的顺序</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">			[10， 40]</span><br><span class="line">		   /    |    \</span><br><span class="line">	   [9]   [20,30]  [50, 60]</span><br><span class="line">// 子节点1 -&gt; 根节点1 -&gt; 子节点2 -&gt; 根节点2 -&gt; ……</span><br></pre></td></tr></table></figure></div></li>
+</ul>
+<p>B&#x2F;B+树的最大区别在于B树在每个节点中同时存储key和value，而B+树在非叶子节点只存储key，叶子节点同时存储key-value，理论上B树也可能提前命中，但B+树会更加稳定。同时B+树的叶子节点由链表结构连接起来，适配范围、有序查找（如 between 10 and 20、order by等）。</p>
+<p>Hash索引与HashMap原理相同，通过链表处理Hash冲突。Hash索引在等值查询（WHERE userId &#x3D; 1）中，查询速度更快，适合纯内存场景。但不支持范围、有序查询。</p>
+<h2 id="InnoDB引擎为什么采用B"><a href="#InnoDB引擎为什么采用B" class="headerlink" title="InnoDB引擎为什么采用B+"></a>InnoDB引擎为什么采用B+</h2><ol>
+<li><p>B+树很适合磁盘IO</p>
+<p>B+树非叶子节点不存储key信息，只有叶子节点才同时存储key-value，那么一层节点就会多，子树就会多，<strong>树就会矮，IO次数少，查询更快</strong>。</p>
+</li>
+<li><p>B+树查询性能更稳定。</p>
+<p>B树中数据可能提前出现在某个非叶子节点，可能提前查询到，也可能一直到叶子节点层。B+树中数据全部在叶子节点，每次查询的路径长度相同，<strong>单次查询更稳定、更容易预测延迟</strong>。</p>
+</li>
+<li><p>B+树适合范围查询</p>
+<p>B+树的<strong>叶子节点之间有指针相连，形成有序链表结构，能够更快地进行范围查询</strong>。</p>
+</li>
+<li><p>适合数据库的“页查询”</p>
+<p>B+树的存储方式很适合数据库的“页”结构，非叶子节点只负责导航，叶子节点单独存储完整记录。</p>
+</li>
+</ol>
+<p>B树和B+树核心对比</p>
+<table>
+<thead>
+<tr>
+<th>B树</th>
+<th>B+树</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>非叶子节点也存数据</td>
+<td>只有叶子节点存数据</td>
+</tr>
+<tr>
+<td>树可能更高</td>
+<td>非叶子节点更“胖”，树更矮</td>
+</tr>
+<tr>
+<td>单点查找理论上可能更早命中</td>
+<td>查询路径更稳定</td>
+</tr>
+<tr>
+<td>范围查询不够友好</td>
+<td>叶子节点链表非常适合范围查询和排序</td>
+</tr>
+</tbody></table>
 
 		</div>
 
@@ -399,7 +450,7 @@
         
             <li>
                 <strong>更新于
-                    :</strong> 2026-04-03 23:35:07
+                    :</strong> 2026-04-04 10:24:56
             </li>
         
         <li>
@@ -439,6 +490,18 @@
 
 		
 		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/04/04/MySQL%E8%BF%9B%E9%98%B6%E7%AC%94%E8%AE%B0-Day2/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">MySQL进阶-Day2</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
 			
 			
 			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
@@ -528,7 +591,7 @@
 	<div class="post-toc">
 		<div class="toc-title">目录</div>
 		<div class="page-title">MySQL进阶笔记 Day1</div>
-		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E6%9D%A1Select%E7%9A%84%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B"><span class="nav-text">一条Select的完整流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL%E7%9A%84%E4%B8%A4%E9%98%B6%E6%AE%B5%E6%8F%90%E4%BA%A4"><span class="nav-text">MySQL的两阶段提交</span></a></li></ol>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E6%9D%A1Select%E7%9A%84%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B"><span class="nav-text">一条Select的完整流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL%E7%9A%84%E4%B8%A4%E9%98%B6%E6%AE%B5%E6%8F%90%E4%BA%A4"><span class="nav-text">MySQL的两阶段提交</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-text">索引数据结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#InnoDB%E5%BC%95%E6%93%8E%E4%B8%BA%E4%BB%80%E4%B9%88%E9%87%87%E7%94%A8B"><span class="nav-text">InnoDB引擎为什么采用B+</span></a></li></ol>
 
 	</div>
 </div>
@@ -558,7 +621,7 @@
                 
                 <p class="post-count space-x-0.5">
                     <span>
-                        共撰写了 11 篇文章
+                        共撰写了 12 篇文章
                     </span>
                     
                 </p>
