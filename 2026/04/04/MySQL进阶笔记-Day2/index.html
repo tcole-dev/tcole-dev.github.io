@@ -94,7 +94,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/images/redefine-og.webp">
 <meta property="article:published_time" content="2026-04-04T13:55:08.000Z">
-<meta property="article:modified_time" content="2026-04-04T13:57:15.519Z">
+<meta property="article:modified_time" content="2026-04-06T05:48:37.900Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="数据库">
 <meta property="article:tag" content="笔记">
@@ -277,7 +277,7 @@
         <div class="label text-third-text-color text-sm">分类</div>
     </a>
     <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
-        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">12</div>
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">13</div>
         <div class="label text-third-text-color text-sm">文章</div>
     </a>
 </div>
@@ -328,8 +328,8 @@
     
         <span class="article-date article-meta-item">
             <i class="fa-regular fa-wrench"></i>&nbsp;
-            <span class="desktop">2026-04-04 21:57:15</span>
-            <span class="mobile">2026-04-04 21:57:15</span>
+            <span class="desktop">2026-04-06 13:48:37</span>
+            <span class="mobile">2026-04-06 13:48:37</span>
             <span class="hover-info">更新</span>
         </span>
     
@@ -407,6 +407,258 @@
 <div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[罗A, 5]		[罗A, 6]		[罗L, 1]		[罗z, 3]</span><br></pre></td></tr></table></figure></div>
 
 <p>那么，在mysql 5.6 中引入了索引下推机制，这种情况下，会先匹配联合索引中的其他字段，在这个例子中，会继续匹配grade，前三条记录的grade都不为3，那么就不会回表，只有grade &#x3D; 3的<code>[罗z, 3]</code>才会回表查询，极大地降低了回表次数。</p>
+<h2 id="索引失效"><a href="#索引失效" class="headerlink" title="索引失效"></a>索引失效</h2><p>在很多场景下，索引可能会失效，或者优化器觉得索引收益过低，这时就会直接进行全表扫描，常见索引失效场景如下：</p>
+<p><strong>较常见情况</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>典型 SQL</th>
+<th>失效类型</th>
+<th>原因</th>
+<th>推荐做法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>对索引列使用函数</td>
+<td><code>where date(create_time) = &#39;2026-04-06&#39;</code></td>
+<td>完全失效</td>
+<td>函数作用在列上，无法直接利用原始索引值</td>
+<td>改为范围查询：<code>create_time &gt;= ... and create_time &lt; ...</code></td>
+</tr>
+<tr>
+<td>对索引列做运算&#x2F;表达式</td>
+<td><code>where age + 1 = 20</code></td>
+<td>完全失效</td>
+<td>列值先参与计算，索引无法直接定位</td>
+<td>改写为 <code>where age = 19</code></td>
+</tr>
+<tr>
+<td><code>like</code> 以 <code>%</code> 开头</td>
+<td><code>where name like &#39;%abc&#39;</code> &#x2F; <code>&#39;%abc%&#39;</code></td>
+<td>完全失效</td>
+<td>B+Tree 索引不能从左侧确定起始范围</td>
+<td>尽量改成 <code>like &#39;abc%&#39;</code></td>
+</tr>
+<tr>
+<td>联合索引不满足最左前缀</td>
+<td>索引 <code>(a,b,c)</code>，查询 <code>where b = 1</code></td>
+<td>完全失效</td>
+<td>跳过最左列，无法从索引头开始匹配</td>
+<td>查询尽量从最左列开始，或重建索引</td>
+</tr>
+<tr>
+<td>联合索引中范围查询后续列失效</td>
+<td>索引 <code>(a,b,c)</code>，查询 <code>where a=1 and b&gt;2 and c=3</code></td>
+<td>部分失效</td>
+<td><code>b</code> 出现范围后，<code>c</code> 往往不能继续用于定位</td>
+<td>等值条件尽量放前，按查询模式设计索引</td>
+</tr>
+<tr>
+<td>隐式类型转换</td>
+<td><code>where phone = 13800138000</code>，而 <code>phone</code> 是 <code>varchar</code></td>
+<td>完全&#x2F;大概率失效</td>
+<td>比较时可能发生列类型转换，导致索引不能正常利用</td>
+<td>保持字段类型和参数类型一致</td>
+</tr>
+<tr>
+<td><code>or</code> 使用不当</td>
+<td><code>where a=1 or b=2</code></td>
+<td>容易失效</td>
+<td>多条件合并成本高，优化器可能放弃索引走全表</td>
+<td>可改成 <code>union all</code> 分开查</td>
+</tr>
+<tr>
+<td>使用 <code>!=</code>、<code>&lt;&gt;</code>、<code>not in</code></td>
+<td><code>where status != 1</code></td>
+<td>容易失效</td>
+<td>否定条件选择性差，扫描范围通常很大</td>
+<td>尽量改为正向条件</td>
+</tr>
+<tr>
+<td>低区分度字段建索引</td>
+<td><code>where is_deleted = 0</code></td>
+<td>容易不走索引</td>
+<td>重复值太多，走索引后仍需扫描大量数据</td>
+<td>低区分度字段不宜单独建索引，可做联合索引</td>
+</tr>
+<tr>
+<td>查询结果集过大</td>
+<td><code>select * from user where age &gt; 18</code></td>
+<td>容易不走索引</td>
+<td>命中记录太多，回表成本高，优化器可能选全表扫描</td>
+<td>缩小范围、避免大结果集</td>
+</tr>
+<tr>
+<td><code>select *</code> 导致大量回表</td>
+<td><code>select * from t where a = 1</code></td>
+<td>索引利用差</td>
+<td>条件能走索引，但查询列太多导致频繁回表</td>
+<td>尽量只查需要的列，使用覆盖索引</td>
+</tr>
+<tr>
+<td>排序与索引顺序不一致</td>
+<td>索引 <code>(a,b)</code>，<code>order by b,a</code></td>
+<td>排序阶段失效</td>
+<td>索引顺序无法满足排序要求，可能触发 <code>filesort</code></td>
+<td>让 <code>where</code> 与 <code>order by</code> 顺序匹配索引</td>
+</tr>
+</tbody></table>
+<p><strong>非常见情况</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>典型 SQL &#x2F; 情况</th>
+<th>失效类型</th>
+<th>原因</th>
+<th>推荐做法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>统计信息过旧</td>
+<td>有索引但 <code>EXPLAIN</code> 不走</td>
+<td>伪失效</td>
+<td>不是索引真失效，而是优化器因统计信息不准选错执行计划</td>
+<td>更新统计信息，重新分析执行计划</td>
+</tr>
+<tr>
+<td>字符集 &#x2F; 排序规则不一致</td>
+<td>两个字符串列比较或参数字符集不同</td>
+<td>容易失效</td>
+<td>比较时可能发生转换，影响索引使用</td>
+<td>统一字符集与排序规则</td>
+</tr>
+<tr>
+<td>联合索引“看似命中，实则部分失效”</td>
+<td>索引 <code>(a,b,c)</code>，查询 <code>where a=1 and c=3</code></td>
+<td>部分失效</td>
+<td>只能稳定利用 <code>a</code>，<code>c</code> 通常只参与过滤</td>
+<td>按真实查询模式补建索引 <code>(a,c)</code></td>
+</tr>
+<tr>
+<td>范围条件叠加排序</td>
+<td>索引 <code>(a,b)</code>，查询 <code>where a &gt; 10 order by b</code></td>
+<td>排序部分失效</td>
+<td>过滤后无法继续保证 <code>b</code> 的全局有序性</td>
+<td>重新设计过滤与排序字段顺序</td>
+</tr>
+<tr>
+<td><code>group by</code> 无法匹配索引</td>
+<td>索引 <code>(a,b)</code>，<code>group by b</code></td>
+<td>分组阶段失效</td>
+<td>分组字段不满足索引前缀要求，可能使用临时表</td>
+<td>让分组字段顺序匹配索引</td>
+</tr>
+<tr>
+<td>深分页</td>
+<td><code>limit 100000, 20</code></td>
+<td>非严格失效，但效果很差</td>
+<td>即便走索引，也要扫描前面大量记录再丢弃</td>
+<td>用游标分页、延迟关联</td>
+</tr>
+<tr>
+<td>分区裁剪未命中</td>
+<td>分区表查询未带分区键</td>
+<td>分区级退化</td>
+<td>无法缩小到目标分区，导致扫描多个分区</td>
+<td>查询条件尽量包含分区字段</td>
+</tr>
+<tr>
+<td>表达式索引未正确命中</td>
+<td>建了表达式索引，但 SQL 表达式写法不同</td>
+<td>失效</td>
+<td>查询表达式与索引定义不一致</td>
+<td>查询表达式与索引定义保持一致</td>
+</tr>
+<tr>
+<td>生成列索引未按生成逻辑使用</td>
+<td>对生成列建索引，但查询写原始复杂表达式</td>
+<td>容易失效</td>
+<td>优化器不一定自动等价改写</td>
+<td>直接查询生成列</td>
+</tr>
+<tr>
+<td>参数绑定类型错误</td>
+<td>代码里预编译参数类型传错</td>
+<td>隐蔽失效</td>
+<td>线上 SQL 看起来没问题，但驱动传参类型不对</td>
+<td>检查 ORM &#x2F; 驱动参数类型</td>
+</tr>
+<tr>
+<td>复合查询优化器改写导致未按预期走索引</td>
+<td>子查询、视图、复杂 <code>OR/AND</code> 嵌套</td>
+<td>间接失效</td>
+<td>SQL 被改写后执行计划变化，原索引未被优先使用</td>
+<td>拆解复杂 SQL，逐段 <code>EXPLAIN</code></td>
+</tr>
+<tr>
+<td>覆盖索引缺失导致优化器放弃索引</td>
+<td>条件字段有索引，但回表列太多</td>
+<td>间接失效</td>
+<td>优化器评估回表成本高，直接放弃索引</td>
+<td>建覆盖索引或减少查询列</td>
+</tr>
+</tbody></table>
+<p><strong>两类场景对比</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>分类</th>
+<th>特点</th>
+<th>典型问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>常见场景</td>
+<td>SQL 写法直接导致索引不能用</td>
+<td>函数、<code>like &#39;%x&#39;</code>、最左前缀、隐式转换</td>
+</tr>
+<tr>
+<td>非常见场景</td>
+<td>索引本身没问题，但优化器、架构、数据分布、特殊语义导致效果差</td>
+<td>统计信息、深分页、分区、字符集、表达式索引</td>
+</tr>
+</tbody></table>
+<h3 id="常见6条"><a href="#常见6条" class="headerlink" title="常见6条"></a>常见6条</h3><table>
+<thead>
+<tr>
+<th>序号</th>
+<th>高频失效点</th>
+<th>关键词</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>对索引列做函数&#x2F;计算</td>
+<td><code>date(col)</code>、<code>col+1</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>like</code> 前置 <code>%</code></td>
+<td><code>&#39;%abc&#39;</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>联合索引不满足最左前缀</td>
+<td><code>(a,b,c)</code> 只查 <code>b</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>范围查询后续列失效</td>
+<td><code>a=1 and b&gt;2 and c=3</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>隐式类型转换</td>
+<td><code>varchar</code> 列拿数字查</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>or</code>、<code>!=</code>、<code>not in</code></td>
+<td>选择性差，易放弃索引</td>
+</tr>
+</tbody></table>
 
 		</div>
 
@@ -421,7 +673,7 @@
         
             <li>
                 <strong>更新于
-                    :</strong> 2026-04-04 21:57:15
+                    :</strong> 2026-04-06 13:48:37
             </li>
         
         <li>
@@ -461,6 +713,18 @@
 
 		
 		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/04/06/MySQL%E8%BF%9B%E9%98%B6%E7%AC%94%E8%AE%B0-Day3/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">MySQL进阶笔记-Day3</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
 			
 			
 			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
@@ -550,7 +814,7 @@
 	<div class="post-toc">
 		<div class="toc-title">目录</div>
 		<div class="page-title">MySQL进阶-Day2</div>
-		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E7%BB%93%E6%9E%84"><span class="nav-text">索引结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95%E5%92%8C%E9%9D%9E%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95"><span class="nav-text">聚簇索引和非聚簇索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E7%9A%84%E7%B4%A2%E5%BC%95"><span class="nav-text">不同存储引擎的索引</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E5%9C%A8%E5%AE%9E%E9%99%85%E4%BD%BF%E7%94%A8%E4%B8%AD%E7%9A%84%E4%BC%98%E5%8C%96%E6%9C%BA%E5%88%B6"><span class="nav-text">索引在实际使用中的优化机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9E%E8%A1%A8%E6%9F%A5%E8%AF%A2-%E8%A6%86%E7%9B%96%E7%B4%A2%E5%BC%95"><span class="nav-text">回表查询&amp;覆盖索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%B7%A6%E5%89%8D%E7%BC%80%E5%8E%9F%E5%88%99"><span class="nav-text">最左前缀原则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E4%B8%8B%E6%8E%A8%EF%BC%88ICP%EF%BC%89"><span class="nav-text">索引下推（ICP）</span></a></li></ol></li></ol>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E7%BB%93%E6%9E%84"><span class="nav-text">索引结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95%E5%92%8C%E9%9D%9E%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95"><span class="nav-text">聚簇索引和非聚簇索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E7%9A%84%E7%B4%A2%E5%BC%95"><span class="nav-text">不同存储引擎的索引</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E5%9C%A8%E5%AE%9E%E9%99%85%E4%BD%BF%E7%94%A8%E4%B8%AD%E7%9A%84%E4%BC%98%E5%8C%96%E6%9C%BA%E5%88%B6"><span class="nav-text">索引在实际使用中的优化机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9E%E8%A1%A8%E6%9F%A5%E8%AF%A2-%E8%A6%86%E7%9B%96%E7%B4%A2%E5%BC%95"><span class="nav-text">回表查询&amp;覆盖索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%B7%A6%E5%89%8D%E7%BC%80%E5%8E%9F%E5%88%99"><span class="nav-text">最左前缀原则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E4%B8%8B%E6%8E%A8%EF%BC%88ICP%EF%BC%89"><span class="nav-text">索引下推（ICP）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88"><span class="nav-text">索引失效</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%816%E6%9D%A1"><span class="nav-text">常见6条</span></a></li></ol></li></ol>
 
 	</div>
 </div>
@@ -580,7 +844,7 @@
                 
                 <p class="post-count space-x-0.5">
                     <span>
-                        共撰写了 12 篇文章
+                        共撰写了 13 篇文章
                     </span>
                     
                 </p>
