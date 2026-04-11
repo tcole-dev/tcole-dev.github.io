@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="索引结构聚簇索引和非聚簇索引聚簇索引：索引和数据是存放在一起的，同时表中数据会按照索引顺序排列存储，索引即数据，两者严格绑定。InnoDB引擎中，主键为聚簇索引，且一张表只有一个聚簇索引，因为表中记录是按照聚簇索引排列的。 非聚簇索引：InnoDB引擎中，二级索引，如INDEX、NOT NULL等都是非聚簇索引，非聚簇索引同样会产生一颗B+树，但这颗B+树的叶子节点中，不存储完整记录，而是存储主键">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL进阶-Day2">
+<meta property="og:url" content="http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="索引结构聚簇索引和非聚簇索引聚簇索引：索引和数据是存放在一起的，同时表中数据会按照索引顺序排列存储，索引即数据，两者严格绑定。InnoDB引擎中，主键为聚簇索引，且一张表只有一个聚簇索引，因为表中记录是按照聚簇索引排列的。 非聚簇索引：InnoDB引擎中，二级索引，如INDEX、NOT NULL等都是非聚簇索引，非聚簇索引同样会产生一颗B+树，但这颗B+树的叶子节点中，不存储完整记录，而是存储主键">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-04-04T13:55:08.000Z">
+<meta property="article:modified_time" content="2026-04-06T05:48:37.900Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="数据库">
+<meta property="article:tag" content="笔记">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>MySQL进阶-Day2</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2026/04/06/MySQL%E8%BF%9B%E9%98%B6-Day3/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2026/04/03/MySQL%E8%BF%9B%E9%98%B6-Day1/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&text=MySQL进阶-Day2"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&title=MySQL进阶-Day2"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&is_video=false&description=MySQL进阶-Day2"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=MySQL进阶-Day2&body=Check out this article: http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&title=MySQL进阶-Day2"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&title=MySQL进阶-Day2"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&title=MySQL进阶-Day2"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&title=MySQL进阶-Day2"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&name=MySQL进阶-Day2&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&t=MySQL进阶-Day2"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">索引结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95%E5%92%8C%E9%9D%9E%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95"><span class="toc-number">1.1.</span> <span class="toc-text">聚簇索引和非聚簇索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E7%9A%84%E7%B4%A2%E5%BC%95"><span class="toc-number">1.2.</span> <span class="toc-text">不同存储引擎的索引</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%E5%9C%A8%E5%AE%9E%E9%99%85%E4%BD%BF%E7%94%A8%E4%B8%AD%E7%9A%84%E4%BC%98%E5%8C%96%E6%9C%BA%E5%88%B6"><span class="toc-number">2.</span> <span class="toc-text">索引在实际使用中的优化机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E8%A1%A8%E6%9F%A5%E8%AF%A2-%E8%A6%86%E7%9B%96%E7%B4%A2%E5%BC%95"><span class="toc-number">2.1.</span> <span class="toc-text">回表查询&amp;覆盖索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%80%E5%B7%A6%E5%89%8D%E7%BC%80%E5%8E%9F%E5%88%99"><span class="toc-number">2.2.</span> <span class="toc-text">最左前缀原则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%E4%B8%8B%E6%8E%A8%EF%BC%88ICP%EF%BC%89"><span class="toc-number">2.3.</span> <span class="toc-text">索引下推（ICP）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88"><span class="toc-number">3.</span> <span class="toc-text">索引失效</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E8%A7%816%E6%9D%A1"><span class="toc-number">3.1.</span> <span class="toc-text">常见6条</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        MySQL进阶-Day2
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">John Doe</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2026-04-04T13:55:08.000Z" class="dt-published" itemprop="datePublished">2026-04-04</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a>, <a class="p-category" href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag">笔记</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="索引结构"><a href="#索引结构" class="headerlink" title="索引结构"></a>索引结构</h2><h3 id="聚簇索引和非聚簇索引"><a href="#聚簇索引和非聚簇索引" class="headerlink" title="聚簇索引和非聚簇索引"></a>聚簇索引和非聚簇索引</h3><p>聚簇索引：索引和数据是存放在一起的，同时表中数据会按照索引顺序排列存储，索引即数据，两者严格绑定。InnoDB引擎中，主键为聚簇索引，且一张表只有一个聚簇索引，因为表中记录是按照聚簇索引排列的。</p>
+<p>非聚簇索引：InnoDB引擎中，二级索引，如<code>INDEX</code>、<code>NOT NULL</code>等都是非聚簇索引，非聚簇索引同样会产生一颗B+树，但这颗B+树的叶子节点中，不存储完整记录，而是存储主键或数据地址，当通过非聚簇索引查找时，通常需要通过非聚簇索引查找到该记录的主键，再根据主键（聚簇索引）查找完整记录。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE TABLE</span> stu (</span><br><span class="line">	id <span class="type">INTEGER</span> <span class="keyword">PRIMARY KEY</span>,</span><br><span class="line">    name <span class="type">VARCHAR</span>(<span class="number">5</span>) <span class="keyword">NOT NULL</span>,</span><br><span class="line">    score <span class="type">INTEGER</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>id作为主键，是聚簇索引，因此底层的B+树中，是按照id的值排列的，表的顺序就是索引顺序。根据id可以查询到完整记录。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">               [15   ,     20]</span><br><span class="line">           /           |         \</span><br><span class="line">         [10]         [15]         [30]</span><br><span class="line">     /          \       |          /    \</span><br><span class="line">[9,name1，90][10,...] [15,...] [20,...][30,...]</span><br></pre></td></tr></table></figure>
+
+<p>而非聚簇索引中叶子节点只存索引（key）和主键（value），再根据主键再次查找，这种做法就叫<code>回表查询</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">               	   [name3]</span><br><span class="line">               /      		 \</span><br><span class="line">         [name2]     		  [name4]</span><br><span class="line">        /      \      		 /     	 \</span><br><span class="line">[name1-&gt;9] [name2-&gt;10] [name3-&gt;15] [name4-&gt;20，name5-&gt;30]</span><br></pre></td></tr></table></figure>
+
+<p><font color='red'>正因为回表查询的存在，所以实际使用中，应该尽量使用主键（聚簇索引），而非二级索引进行条件筛选。</font></p>
+<h3 id="不同存储引擎的索引"><a href="#不同存储引擎的索引" class="headerlink" title="不同存储引擎的索引"></a>不同存储引擎的索引</h3><p>前面提到在InnoDB引擎中，表数据文件本身就是按 B+Tree 组织的一个索引结构，索引就是数据，二级索引（非聚簇索引）是另外单独的一个B+树。</p>
+<p>而在MyISAM中，完全使用非聚簇索引，数据与索引完全分离，<strong>MyISAM 是“B+树索引”指向“堆文件”</strong>，本身的数据并不是B+树，数据文件 (.MYD) 的结构是一块连续的磁盘空间，数据按照insert的顺序一行一行地排列，而索引 (.MYI) 则是B+树，B+树中记录索引键和<strong>行记录的物理地址</strong>。</p>
+<h2 id="索引在实际使用中的优化机制"><a href="#索引在实际使用中的优化机制" class="headerlink" title="索引在实际使用中的优化机制"></a>索引在实际使用中的优化机制</h2><h3 id="回表查询-覆盖索引"><a href="#回表查询-覆盖索引" class="headerlink" title="回表查询&amp;覆盖索引"></a>回表查询&amp;覆盖索引</h3><ul>
+<li><p>回表查询和覆盖索引都是常出现在InnoDB存储引擎中的情况。回表查询前面已经说过了，就是通过二级索引查询主键（聚簇索引），再通过聚簇索引查找完整的记录。</p>
+</li>
+<li><p>覆盖查询则是使用二级索引时，二级索引的B+数种就已经包含了所有要查找的字段，就不需要再进行回表查询了，如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> id, name <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> name <span class="operator">=</span> &quot;tc&quot;;</span><br><span class="line"></span><br><span class="line"><span class="operator">/</span><span class="operator">/</span> 若id为<span class="keyword">primary key</span>（聚簇索引），name为二级索引（非聚簇）</span><br><span class="line"><span class="operator">/</span><span class="operator">/</span> 通过name索引进行查询时，B<span class="operator">+</span>树中只存放[id, name]，而<span class="keyword">SQL</span>语句恰好只需要这两条字段即可，这种情况就是覆盖索引</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="最左前缀原则"><a href="#最左前缀原则" class="headerlink" title="最左前缀原则"></a>最左前缀原则</h3><p>联合索引：一个索引中不只有某一个字段，可能包含两个及以上的字段，如： INDEX(a, ,b, c)</p>
+<p>最左前缀原则是联合索引中的概念 ，当某张表中的多个字段创建了联合索引，那么在使用时，这个索引能被高效利用的前提，是查询条件要<strong>从最左边的列开始连续匹配</strong>。举个例子：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> a <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> a <span class="operator">=</span> <span class="number">1</span> <span class="keyword">AND</span> b <span class="operator">=</span> <span class="number">2</span>;</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> a <span class="operator">=</span> <span class="number">1</span> <span class="keyword">AND</span> b <span class="operator">=</span> <span class="number">2</span> <span class="keyword">AND</span> c <span class="operator">=</span> <span class="number">3</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这三条select语句都遵循了最左前缀原则，可以通过联合前缀查询。而不遵循最左前缀原则的查询语句，则<code>不一定</code>能够使用联合索引。</p>
+<p>注意，是不一定，因为还有包含但不限于如下的可能：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> a, b, c <span class="keyword">from</span> stu <span class="keyword">where</span> c <span class="operator">=</span> <span class="number">3</span>;</span><br></pre></td></tr></table></figure>
+
+<p>即使直接判断的是c，没有a和b，违反了最左前缀原则，但同时查询的字段刚好为联合索引的字段，那么优化器可能就会使用联合索引而不回表，直接查询到所有记录再判断。这种方式虽然使用了联合索引扫描，但始终是不如符合最左前缀原则的select快。</p>
+<h3 id="索引下推（ICP）"><a href="#索引下推（ICP）" class="headerlink" title="索引下推（ICP）"></a>索引下推（ICP）</h3><p>索引下推和覆盖索引有些异曲同工之妙，它们都是为了减少<code>回表</code>而产生的机制，其中，覆盖索引是解决是否需要回表，而索引下推则是尽可能减少回表次数。</p>
+<p>前面提到，若查询语句查询的字段恰好都被联合索引覆盖，则不需要回表，直接在联合索引这张“小表”中查询返回即可。而另一种情况：若查询的字段没有被完全覆盖，则需要进行回表，这就产生了一个问题，举个例子来说：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator">/</span><span class="operator">/</span> 现有联合索引（name, grade）</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> stu <span class="keyword">where</span> name <span class="keyword">like</span> <span class="string">&#x27;罗%&#x27;</span> <span class="keyword">and</span> grade <span class="operator">=</span> <span class="number">3</span>;</span><br></pre></td></tr></table></figure>
+
+<p>联合索引是优先按照第一个字段 name 排序的，但在所有姓“罗”的这个大范围内，grade是无序的，如下面的例子，此时就只能查到第一个姓“罗”的记录，那么就必须从这第一条记录挨个回表，这就会极大地降低效率。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[罗A, 5]		[罗A, 6]		[罗L, 1]		[罗z, 3]</span><br></pre></td></tr></table></figure>
+
+<p>那么，在mysql 5.6 中引入了索引下推机制，这种情况下，会先匹配联合索引中的其他字段，在这个例子中，会继续匹配grade，前三条记录的grade都不为3，那么就不会回表，只有grade &#x3D; 3的<code>[罗z, 3]</code>才会回表查询，极大地降低了回表次数。</p>
+<h2 id="索引失效"><a href="#索引失效" class="headerlink" title="索引失效"></a>索引失效</h2><p>在很多场景下，索引可能会失效，或者优化器觉得索引收益过低，这时就会直接进行全表扫描，常见索引失效场景如下：</p>
+<p><strong>较常见情况</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>典型 SQL</th>
+<th>失效类型</th>
+<th>原因</th>
+<th>推荐做法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>对索引列使用函数</td>
+<td><code>where date(create_time) = &#39;2026-04-06&#39;</code></td>
+<td>完全失效</td>
+<td>函数作用在列上，无法直接利用原始索引值</td>
+<td>改为范围查询：<code>create_time &gt;= ... and create_time &lt; ...</code></td>
+</tr>
+<tr>
+<td>对索引列做运算&#x2F;表达式</td>
+<td><code>where age + 1 = 20</code></td>
+<td>完全失效</td>
+<td>列值先参与计算，索引无法直接定位</td>
+<td>改写为 <code>where age = 19</code></td>
+</tr>
+<tr>
+<td><code>like</code> 以 <code>%</code> 开头</td>
+<td><code>where name like &#39;%abc&#39;</code> &#x2F; <code>&#39;%abc%&#39;</code></td>
+<td>完全失效</td>
+<td>B+Tree 索引不能从左侧确定起始范围</td>
+<td>尽量改成 <code>like &#39;abc%&#39;</code></td>
+</tr>
+<tr>
+<td>联合索引不满足最左前缀</td>
+<td>索引 <code>(a,b,c)</code>，查询 <code>where b = 1</code></td>
+<td>完全失效</td>
+<td>跳过最左列，无法从索引头开始匹配</td>
+<td>查询尽量从最左列开始，或重建索引</td>
+</tr>
+<tr>
+<td>联合索引中范围查询后续列失效</td>
+<td>索引 <code>(a,b,c)</code>，查询 <code>where a=1 and b&gt;2 and c=3</code></td>
+<td>部分失效</td>
+<td><code>b</code> 出现范围后，<code>c</code> 往往不能继续用于定位</td>
+<td>等值条件尽量放前，按查询模式设计索引</td>
+</tr>
+<tr>
+<td>隐式类型转换</td>
+<td><code>where phone = 13800138000</code>，而 <code>phone</code> 是 <code>varchar</code></td>
+<td>完全&#x2F;大概率失效</td>
+<td>比较时可能发生列类型转换，导致索引不能正常利用</td>
+<td>保持字段类型和参数类型一致</td>
+</tr>
+<tr>
+<td><code>or</code> 使用不当</td>
+<td><code>where a=1 or b=2</code></td>
+<td>容易失效</td>
+<td>多条件合并成本高，优化器可能放弃索引走全表</td>
+<td>可改成 <code>union all</code> 分开查</td>
+</tr>
+<tr>
+<td>使用 <code>!=</code>、<code>&lt;&gt;</code>、<code>not in</code></td>
+<td><code>where status != 1</code></td>
+<td>容易失效</td>
+<td>否定条件选择性差，扫描范围通常很大</td>
+<td>尽量改为正向条件</td>
+</tr>
+<tr>
+<td>低区分度字段建索引</td>
+<td><code>where is_deleted = 0</code></td>
+<td>容易不走索引</td>
+<td>重复值太多，走索引后仍需扫描大量数据</td>
+<td>低区分度字段不宜单独建索引，可做联合索引</td>
+</tr>
+<tr>
+<td>查询结果集过大</td>
+<td><code>select * from user where age &gt; 18</code></td>
+<td>容易不走索引</td>
+<td>命中记录太多，回表成本高，优化器可能选全表扫描</td>
+<td>缩小范围、避免大结果集</td>
+</tr>
+<tr>
+<td><code>select *</code> 导致大量回表</td>
+<td><code>select * from t where a = 1</code></td>
+<td>索引利用差</td>
+<td>条件能走索引，但查询列太多导致频繁回表</td>
+<td>尽量只查需要的列，使用覆盖索引</td>
+</tr>
+<tr>
+<td>排序与索引顺序不一致</td>
+<td>索引 <code>(a,b)</code>，<code>order by b,a</code></td>
+<td>排序阶段失效</td>
+<td>索引顺序无法满足排序要求，可能触发 <code>filesort</code></td>
+<td>让 <code>where</code> 与 <code>order by</code> 顺序匹配索引</td>
+</tr>
+</tbody></table>
+<p><strong>非常见情况</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>典型 SQL &#x2F; 情况</th>
+<th>失效类型</th>
+<th>原因</th>
+<th>推荐做法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>统计信息过旧</td>
+<td>有索引但 <code>EXPLAIN</code> 不走</td>
+<td>伪失效</td>
+<td>不是索引真失效，而是优化器因统计信息不准选错执行计划</td>
+<td>更新统计信息，重新分析执行计划</td>
+</tr>
+<tr>
+<td>字符集 &#x2F; 排序规则不一致</td>
+<td>两个字符串列比较或参数字符集不同</td>
+<td>容易失效</td>
+<td>比较时可能发生转换，影响索引使用</td>
+<td>统一字符集与排序规则</td>
+</tr>
+<tr>
+<td>联合索引“看似命中，实则部分失效”</td>
+<td>索引 <code>(a,b,c)</code>，查询 <code>where a=1 and c=3</code></td>
+<td>部分失效</td>
+<td>只能稳定利用 <code>a</code>，<code>c</code> 通常只参与过滤</td>
+<td>按真实查询模式补建索引 <code>(a,c)</code></td>
+</tr>
+<tr>
+<td>范围条件叠加排序</td>
+<td>索引 <code>(a,b)</code>，查询 <code>where a &gt; 10 order by b</code></td>
+<td>排序部分失效</td>
+<td>过滤后无法继续保证 <code>b</code> 的全局有序性</td>
+<td>重新设计过滤与排序字段顺序</td>
+</tr>
+<tr>
+<td><code>group by</code> 无法匹配索引</td>
+<td>索引 <code>(a,b)</code>，<code>group by b</code></td>
+<td>分组阶段失效</td>
+<td>分组字段不满足索引前缀要求，可能使用临时表</td>
+<td>让分组字段顺序匹配索引</td>
+</tr>
+<tr>
+<td>深分页</td>
+<td><code>limit 100000, 20</code></td>
+<td>非严格失效，但效果很差</td>
+<td>即便走索引，也要扫描前面大量记录再丢弃</td>
+<td>用游标分页、延迟关联</td>
+</tr>
+<tr>
+<td>分区裁剪未命中</td>
+<td>分区表查询未带分区键</td>
+<td>分区级退化</td>
+<td>无法缩小到目标分区，导致扫描多个分区</td>
+<td>查询条件尽量包含分区字段</td>
+</tr>
+<tr>
+<td>表达式索引未正确命中</td>
+<td>建了表达式索引，但 SQL 表达式写法不同</td>
+<td>失效</td>
+<td>查询表达式与索引定义不一致</td>
+<td>查询表达式与索引定义保持一致</td>
+</tr>
+<tr>
+<td>生成列索引未按生成逻辑使用</td>
+<td>对生成列建索引，但查询写原始复杂表达式</td>
+<td>容易失效</td>
+<td>优化器不一定自动等价改写</td>
+<td>直接查询生成列</td>
+</tr>
+<tr>
+<td>参数绑定类型错误</td>
+<td>代码里预编译参数类型传错</td>
+<td>隐蔽失效</td>
+<td>线上 SQL 看起来没问题，但驱动传参类型不对</td>
+<td>检查 ORM &#x2F; 驱动参数类型</td>
+</tr>
+<tr>
+<td>复合查询优化器改写导致未按预期走索引</td>
+<td>子查询、视图、复杂 <code>OR/AND</code> 嵌套</td>
+<td>间接失效</td>
+<td>SQL 被改写后执行计划变化，原索引未被优先使用</td>
+<td>拆解复杂 SQL，逐段 <code>EXPLAIN</code></td>
+</tr>
+<tr>
+<td>覆盖索引缺失导致优化器放弃索引</td>
+<td>条件字段有索引，但回表列太多</td>
+<td>间接失效</td>
+<td>优化器评估回表成本高，直接放弃索引</td>
+<td>建覆盖索引或减少查询列</td>
+</tr>
+</tbody></table>
+<p><strong>两类场景对比</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>分类</th>
+<th>特点</th>
+<th>典型问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>常见场景</td>
+<td>SQL 写法直接导致索引不能用</td>
+<td>函数、<code>like &#39;%x&#39;</code>、最左前缀、隐式转换</td>
+</tr>
+<tr>
+<td>非常见场景</td>
+<td>索引本身没问题，但优化器、架构、数据分布、特殊语义导致效果差</td>
+<td>统计信息、深分页、分区、字符集、表达式索引</td>
+</tr>
+</tbody></table>
+<h3 id="常见6条"><a href="#常见6条" class="headerlink" title="常见6条"></a>常见6条</h3><table>
+<thead>
+<tr>
+<th>序号</th>
+<th>高频失效点</th>
+<th>关键词</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>对索引列做函数&#x2F;计算</td>
+<td><code>date(col)</code>、<code>col+1</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>like</code> 前置 <code>%</code></td>
+<td><code>&#39;%abc&#39;</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>联合索引不满足最左前缀</td>
+<td><code>(a,b,c)</code> 只查 <code>b</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>范围查询后续列失效</td>
+<td><code>a=1 and b&gt;2 and c=3</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>隐式类型转换</td>
+<td><code>varchar</code> 列拿数字查</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>or</code>、<code>!=</code>、<code>not in</code></td>
+<td>选择性差，易放弃索引</td>
+</tr>
+</tbody></table>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">索引结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95%E5%92%8C%E9%9D%9E%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95"><span class="toc-number">1.1.</span> <span class="toc-text">聚簇索引和非聚簇索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E7%9A%84%E7%B4%A2%E5%BC%95"><span class="toc-number">1.2.</span> <span class="toc-text">不同存储引擎的索引</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%E5%9C%A8%E5%AE%9E%E9%99%85%E4%BD%BF%E7%94%A8%E4%B8%AD%E7%9A%84%E4%BC%98%E5%8C%96%E6%9C%BA%E5%88%B6"><span class="toc-number">2.</span> <span class="toc-text">索引在实际使用中的优化机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E8%A1%A8%E6%9F%A5%E8%AF%A2-%E8%A6%86%E7%9B%96%E7%B4%A2%E5%BC%95"><span class="toc-number">2.1.</span> <span class="toc-text">回表查询&amp;覆盖索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%80%E5%B7%A6%E5%89%8D%E7%BC%80%E5%8E%9F%E5%88%99"><span class="toc-number">2.2.</span> <span class="toc-text">最左前缀原则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%E4%B8%8B%E6%8E%A8%EF%BC%88ICP%EF%BC%89"><span class="toc-number">2.3.</span> <span class="toc-text">索引下推（ICP）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88"><span class="toc-number">3.</span> <span class="toc-text">索引失效</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E8%A7%816%E6%9D%A1"><span class="toc-number">3.1.</span> <span class="toc-text">常见6条</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&text=MySQL进阶-Day2"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&title=MySQL进阶-Day2"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&is_video=false&description=MySQL进阶-Day2"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=MySQL进阶-Day2&body=Check out this article: http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&title=MySQL进阶-Day2"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&title=MySQL进阶-Day2"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&title=MySQL进阶-Day2"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&title=MySQL进阶-Day2"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&name=MySQL进阶-Day2&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2026/04/04/MySQL%E8%BF%9B%E9%98%B6-Day2/&t=MySQL进阶-Day2"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2026
+    John Doe
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
