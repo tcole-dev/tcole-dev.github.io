@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Golang 语法基础数据类型Go的变量主要包含：  整数型：uint（无符号整型，分8、16、32位等多种，如uint8等价于 byte）、int（同理具有多种不同位的类型）  浮点数：float（分float32、float64）  复数  字符类型：byte（常用于ASCII码值）、rune（等价于int32，表示Unicode字符）、string（可转为[]byte）  派生类型：数组（[">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go-basic.md">
+<meta property="og:url" content="http://example.com/2026/07/24/Go-basic-md/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Golang 语法基础数据类型Go的变量主要包含：  整数型：uint（无符号整型，分8、16、32位等多种，如uint8等价于 byte）、int（同理具有多种不同位的类型）  浮点数：float（分float32、float64）  复数  字符类型：byte（常用于ASCII码值）、rune（等价于int32，表示Unicode字符）、string（可转为[]byte）  派生类型：数组（[">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-07-23T16:12:12.000Z">
+<meta property="article:modified_time" content="2026-07-24T14:45:27.281Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Go">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Go-basic.md</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2026/07/25/Go%E7%9A%84%E7%BB%93%E6%9E%84%E4%BD%93-md/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2026/06/18/Leetcode45-55-%E8%B7%B3%E8%B7%83%E6%B8%B8%E6%88%8F/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2026/07/24/Go-basic-md/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2026/07/24/Go-basic-md/&text=Go-basic.md"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2026/07/24/Go-basic-md/&title=Go-basic.md"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2026/07/24/Go-basic-md/&is_video=false&description=Go-basic.md"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go-basic.md&body=Check out this article: http://example.com/2026/07/24/Go-basic-md/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2026/07/24/Go-basic-md/&title=Go-basic.md"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2026/07/24/Go-basic-md/&title=Go-basic.md"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2026/07/24/Go-basic-md/&title=Go-basic.md"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2026/07/24/Go-basic-md/&title=Go-basic.md"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2026/07/24/Go-basic-md/&name=Go-basic.md&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2026/07/24/Go-basic-md/&t=Go-basic.md"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Golang-%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%A1%80"><span class="toc-number">1.</span> <span class="toc-text">Golang 语法基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.1.</span> <span class="toc-text">数据类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E9%87%8F"><span class="toc-number">1.2.</span> <span class="toc-text">常量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%98%E9%87%8F"><span class="toc-number">1.3.</span> <span class="toc-text">变量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A1%E4%BB%B6%E5%88%A4%E6%96%AD"><span class="toc-number">1.4.</span> <span class="toc-text">条件判断</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AA%E7%8E%AF"><span class="toc-number">1.5.</span> <span class="toc-text">循环</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#switch-%E8%AF%AD%E5%8F%A5"><span class="toc-number">1.6.</span> <span class="toc-text">switch 语句</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B%E5%88%A4%E6%96%AD"><span class="toc-number">1.7.</span> <span class="toc-text">类型判断</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Go-basic.md
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">John Doe</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2026-07-23T16:12:12.000Z" class="dt-published" itemprop="datePublished">2026-07-24</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Go/" rel="tag">Go</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h1 id="Golang-语法基础"><a href="#Golang-语法基础" class="headerlink" title="Golang 语法基础"></a>Golang 语法基础</h1><h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><p>Go的变量主要包含：</p>
+<ul>
+<li><p>整数型：uint（无符号整型，分8、16、32位等多种，如<code>uint8</code>等价于 <code>byte</code>）、int（同理具有多种不同位的类型）</p>
+</li>
+<li><p>浮点数：float（分float32、float64）</p>
+</li>
+<li><p>复数</p>
+</li>
+<li><p>字符类型：byte（常用于ASCII码值）、rune（等价于<code>int32</code>，表示Unicode字符）、string（可转为[]byte）</p>
+</li>
+<li><p>派生类型：数组（<code>[length]int</code>，使用较少）、切片（<code>[]int</code>, 使用较多）、map（<code>[key]value</code>）、指针、函数、结构体、接口（interface{}）、通道（chan）</p>
+</li>
+</ul>
+<h2 id="常量"><a href="#常量" class="headerlink" title="常量"></a>常量</h2><p>常量的定义使用<code>const</code>关键字：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> NAME <span class="type">string</span> = <span class="string">&quot;Jack&quot;</span></span><br><span class="line"><span class="keyword">const</span> NAME = <span class="string">&quot;Jack&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">    NAME = <span class="string">&quot;Jack&quot;</span></span><br><span class="line">    SIZE = <span class="number">10</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p><strong>iota标识符</strong></p>
+<p>在声明大量常量时，可使用iota声明一组自增的整型常量，几乎可以理解为0</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> (</span><br><span class="line">    NUM1 = <span class="literal">iota</span> <span class="comment">// 0 </span></span><br><span class="line">    NUM2        <span class="comment">// 1</span></span><br><span class="line">    NUM3        <span class="comment">// 2</span></span><br><span class="line">    _           <span class="comment">// 3，_表示忽略</span></span><br><span class="line">    NUM4        <span class="comment">// 4</span></span><br><span class="line">)</span><br><span class="line"><span class="comment">// 同时iota也可以使用算术符，修改赋值</span></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">    NUM1 = <span class="literal">iota</span> + <span class="number">1</span> <span class="comment">// 0 + 1</span></span><br><span class="line">    NUM2            <span class="comment">// 1 + 1</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">    NUM1 = <span class="literal">iota</span> &lt;&lt; <span class="number">1</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><p>变量的定义：</p>
+<p>Go使用<code>var</code>声明变量，写法为 <code> var name type</code></p>
+<p>更常用的方法是使用 <code>:=</code>，同时声明和赋值，同时 :&#x3D; 可以自动判断变量类型，不需要显式写变量的数据类型。但 :&#x3D; 只能用在函数内部定义局部变量，不能用于全局变量的声明</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> num <span class="type">int</span></span><br><span class="line">num = <span class="number">10</span></span><br><span class="line"><span class="comment">// 等价于</span></span><br><span class="line"><span class="keyword">var</span> num = <span class="number">10</span></span><br><span class="line"><span class="comment">// 等价于</span></span><br><span class="line">num := <span class="number">10</span></span><br></pre></td></tr></table></figure>
+
+<p><font color='orange'>slice 切片、map、chan类型的变量创建比较特殊，需要使用make()函数</font></p>
+<p>map、chan变量本质上是一个指针，指向hmap、hchan结构体，slice则是一个结构体，内部维护一个指向数组的指针</p>
+<p>其中map、chan若使用 <code>var m map[string]int</code>、<code>var ch chan int</code>时，变量仅为一个空指针，没有hmap、hchan对象，进行任何操作都会报错</p>
+<p>而slice在声明后，底层指针为nil,没有数组，此时存入、访问其中的元素都会报错，但append不受影响，会自动创建底层数组。</p>
+<p>其他类型如string、int在var时，会分配内存。make()方法在创建slice、map、chan变量时，也会分配内存，类似malloc。除了make,slice还有另一种定义方式，<code>slice := []int{}</code></p>
+<p><strong><font color=orange>零值</font></strong></p>
+<p>零值不是0,零值是每种类型变量在初始化后的默认值&#x2F;空值</p>
+<p>数字类型（整型、浮点数）的零值为0；bool则为false；字符串为””</p>
+<p>结构体的零值为一个所有字段都为零值的结构体对象</p>
+<p>其他对象则为nil</p>
+<p><font color=red>注意：Golang中，一个变量被声明后，必须要被使用，否则会在编译时报错</font></p>
+<h2 id="条件判断"><a href="#条件判断" class="headerlink" title="条件判断"></a>条件判断</h2><p>Go的条件判断和Java几乎没有区别，但Go有一个特性：自动添加<code>;</code>，</p>
+<ul>
+<li><p><strong>标识符</strong>（如变量名、函数名，例如 <code>x</code>, <code>main</code>）</p>
+</li>
+<li><p><strong>基本字面量</strong>（整型、浮点型、复数、字符、字符串，例如 <code>123</code>, <code>&quot;hello&quot;</code>）</p>
+</li>
+<li><p><strong>特定的跳转关键字</strong>：<code>break</code>、<code>continue</code>、<code>fallthrough</code>、 <code>return</code></p>
+</li>
+<li><p><strong>自增或自减运算符</strong>：<code>++</code>、 <code>--</code></p>
+</li>
+<li><p><strong>右括号&#x2F;右方括号&#x2F;右大括号</strong>：<code>)</code>、<code>]</code>、</p>
+</li>
+</ul>
+<p>因此如果这样写：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> a &gt; b</span><br><span class="line">&#123;</span><br><span class="line">    a = c</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>就会报错，正确的写法应该是：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> a &gt; b &#123;</span><br><span class="line">    a = c</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="循环"><a href="#循环" class="headerlink" title="循环"></a>循环</h2><ul>
+<li><p>写法一： for 表达式; 表达式; 表达式 {}，类比Java的写法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>写法二：for 表达式 {}，等价于while</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> a &lt; b &#123;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>写法三： for range {}，类似Python的 for range写法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> idx, val := <span class="keyword">range</span> slice &#123;</span><br><span class="line">     <span class="comment">// 接收 range 的两个参数时，第一个表示索引，第二个返回值表示值</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> idx := <span class="keyword">range</span> slice &#123;</span><br><span class="line">    <span class="comment">// 一个返回值则表示索引</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> key, val := <span class="keyword">range</span> kmap &#123;</span><br><span class="line">    <span class="comment">// 当遍历map时，第一个返回值表示key,第二个为value</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> item := <span class="keyword">range</span> channel &#123;</span><br><span class="line">    <span class="comment">// 当遍历 chan 时，只会有一个返回值，表示传输数据</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于for range写法，主要用于<code>array</code>、<code>slice</code>、<code>map</code>、<code>string</code>、<code>chan</code>的遍历</p>
+</li>
+</ul>
+<p><strong>循环相关关键词</strong><br>break、continue - 跳出循环、跳过本次循环<br>goto - 类似C语言的goto</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Here:</span><br><span class="line"><span class="keyword">if</span> i &lt; <span class="number">3</span> &#123;</span><br><span class="line">   fmt.Println(i)</span><br><span class="line">   i++</span><br><span class="line">   <span class="keyword">goto</span> Here</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>goto的限制：<br>1.不能跨函数跳转 2.不能跳过变量声明（及时被跳过的变量在后续不会被使用） 3. 不能跳入内层代码块（如<code>if</code>）<br>goto在目前使用较少，其两种核心用途均可被其他方式替代：</p>
+<ul>
+<li><p>集中处理错误、资源清理，目前更主流的方式是 defer()</p>
+</li>
+<li><p>跳出多重循环，但这种情况可使用<code>break</code>的标签</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">OutLoop:</span><br><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">     <span class="keyword">for</span> j := <span class="number">0</span>; j &lt; <span class="number">10</span>; j++ &#123;</span><br><span class="line">         <span class="keyword">break</span> OutLoop</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="switch-语句"><a href="#switch-语句" class="headerlink" title="switch 语句"></a>switch 语句</h2><ul>
+<li><p>默认不需要 break , case 匹配后自动终止，可使用 <code>fallthrough</code> 显式穿透执行下一个case</p>
+</li>
+<li><p>case 可以匹配多个值</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span> n &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>:</span><br><span class="line">        fmt.Println(<span class="string">&quot;奇数&quot;</span>)</span><br><span class="line">    <span class="keyword">case</span> <span class="number">2</span>, <span class="number">4</span>, <span class="number">6</span>:</span><br><span class="line">        fmt.Println(<span class="string">&quot;偶数&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>case 可匹配布尔条件，取代<code>if-else</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span> num &#123;</span><br><span class="line">    <span class="keyword">case</span> num &gt; <span class="number">0</span>:</span><br><span class="line">        fmt.Println(<span class="string">&quot;正数&quot;</span>)</span><br><span class="line">    <span class="keyword">case</span> num &lt; <span class="number">0</span>:</span><br><span class="line">        fmt.Println(<span class="string">&quot;负数&quot;</span>)</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        fmt.Println(<span class="string">&quot;num == 10&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>支持初始化</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span> num := <span class="number">10</span>; num &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">10</span>:</span><br><span class="line">        fmt.Println(<span class="string">&quot;num == 10&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>case 除了匹配常量外，可匹配变量、函数返回值</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">getVal := <span class="function"><span class="keyword">func</span><span class="params">()</span></span> <span class="type">int</span> &#123; <span class="keyword">return</span> <span class="number">2</span> &#125;</span><br><span class="line">n := <span class="number">2</span></span><br><span class="line">m := <span class="number">3</span></span><br><span class="line"><span class="keyword">switch</span> n &#123;</span><br><span class="line">    <span class="keyword">case</span> m:</span><br><span class="line">        fmt.Pringln(<span class="string">&quot;num == 3&quot;</span>)</span><br><span class="line">    <span class="keyword">case</span> getVal():</span><br><span class="line">        fmt.Println(<span class="string">&quot;num == 2&quot;</span>)</span><br><span class="line">        fmt.Println(<span class="string">&quot;function case&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>switch 可判断接口类型，只能用于接口 <code>interface{}</code> &#x2F; <code>any</code> （两者等价）</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> x <span class="keyword">interface</span>&#123;&#125; = <span class="number">3</span></span><br><span class="line"><span class="keyword">switch</span> x.(<span class="keyword">type</span>) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="type">int</span>:</span><br><span class="line">        fmt.Println(<span class="string">&quot;int type&quot;</span>)</span><br><span class="line">    <span class="keyword">case</span> <span class="type">float64</span>:</span><br><span class="line">        fmt.Println(<span class="string">&quot;float64 type&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="类型判断"><a href="#类型判断" class="headerlink" title="类型判断"></a>类型判断</h2><p>Go中变量的判断主要有以下几种方式：</p>
+<ol>
+<li><p><code>val.(int)</code>，断言，要指明要判断的类型，当单返回值时，若失败直接panic,成功返回则是对应类型。只适用于 interface{} &#x2F; any</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> x any = <span class="number">10</span></span><br><span class="line">v := x.(<span class="type">int</span>)</span><br><span class="line">fmt.Println(v)    <span class="comment">// int</span></span><br><span class="line"><span class="comment">// 若断言失败，则直接panic终止程序</span></span><br><span class="line">y := x.(<span class="type">string</span>)   <span class="comment">// panic</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>val.(type)，只能用在switch中对 interface{} &#x2F; any 判断</p>
+</li>
+<li><p>反射包 <code>reflect</code>，可用于普通变量的判断</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;reflect&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> x <span class="type">int</span> = <span class="number">10</span></span><br><span class="line">fmt.Println(reflect.TypeOf(x))    <span class="comment">// int</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Golang-%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%A1%80"><span class="toc-number">1.</span> <span class="toc-text">Golang 语法基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.1.</span> <span class="toc-text">数据类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E9%87%8F"><span class="toc-number">1.2.</span> <span class="toc-text">常量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%98%E9%87%8F"><span class="toc-number">1.3.</span> <span class="toc-text">变量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A1%E4%BB%B6%E5%88%A4%E6%96%AD"><span class="toc-number">1.4.</span> <span class="toc-text">条件判断</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AA%E7%8E%AF"><span class="toc-number">1.5.</span> <span class="toc-text">循环</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#switch-%E8%AF%AD%E5%8F%A5"><span class="toc-number">1.6.</span> <span class="toc-text">switch 语句</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B%E5%88%A4%E6%96%AD"><span class="toc-number">1.7.</span> <span class="toc-text">类型判断</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2026/07/24/Go-basic-md/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2026/07/24/Go-basic-md/&text=Go-basic.md"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2026/07/24/Go-basic-md/&title=Go-basic.md"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2026/07/24/Go-basic-md/&is_video=false&description=Go-basic.md"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go-basic.md&body=Check out this article: http://example.com/2026/07/24/Go-basic-md/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2026/07/24/Go-basic-md/&title=Go-basic.md"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2026/07/24/Go-basic-md/&title=Go-basic.md"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2026/07/24/Go-basic-md/&title=Go-basic.md"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2026/07/24/Go-basic-md/&title=Go-basic.md"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2026/07/24/Go-basic-md/&name=Go-basic.md&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2026/07/24/Go-basic-md/&t=Go-basic.md"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2026
+    John Doe
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
