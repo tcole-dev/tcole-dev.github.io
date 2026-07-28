@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Go的错误机制Go中的错误分三种：error、panic、fatal，严重程度依次递增。 errorerror是程序执行过程很正常的错误，类似Java的Exception，但发生error不会像Exception一样终止程序。Go也没有try-catch的语法，需要显式将error作为返回值返回，手动判断是否发生错误。因此，Go也被称为面向nil编程 1234567func funa(a, b i">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go-basic4.md">
+<meta property="og:url" content="http://example.com/2026/07/28/Go-basic4-md/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Go的错误机制Go中的错误分三种：error、panic、fatal，严重程度依次递增。 errorerror是程序执行过程很正常的错误，类似Java的Exception，但发生error不会像Exception一样终止程序。Go也没有try-catch的语法，需要显式将error作为返回值返回，手动判断是否发生错误。因此，Go也被称为面向nil编程 1234567func funa(a, b i">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-07-28T11:28:33.000Z">
+<meta property="article:modified_time" content="2026-07-28T11:30:14.742Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Go">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Go-basic4.md</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2026/07/28/Go-basic3-md/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2026/07/28/Go-basic4-md/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2026/07/28/Go-basic4-md/&text=Go-basic4.md"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2026/07/28/Go-basic4-md/&title=Go-basic4.md"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2026/07/28/Go-basic4-md/&is_video=false&description=Go-basic4.md"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go-basic4.md&body=Check out this article: http://example.com/2026/07/28/Go-basic4-md/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2026/07/28/Go-basic4-md/&title=Go-basic4.md"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2026/07/28/Go-basic4-md/&title=Go-basic4.md"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2026/07/28/Go-basic4-md/&title=Go-basic4.md"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2026/07/28/Go-basic4-md/&title=Go-basic4.md"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2026/07/28/Go-basic4-md/&name=Go-basic4.md&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2026/07/28/Go-basic4-md/&t=Go-basic4.md"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Go%E7%9A%84%E9%94%99%E8%AF%AF%E6%9C%BA%E5%88%B6"><span class="toc-number">1.</span> <span class="toc-text">Go的错误机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#error"><span class="toc-number">1.1.</span> <span class="toc-text">error</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA"><span class="toc-number">1.1.1.</span> <span class="toc-text">创建</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#error%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="toc-number">1.1.2.</span> <span class="toc-text">error的定义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%A0%E9%80%92%E4%B8%8E%E9%94%99%E8%AF%AF%E9%93%BE"><span class="toc-number">1.1.3.</span> <span class="toc-text">传递与错误链</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#panic"><span class="toc-number">1.2.</span> <span class="toc-text">panic</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#panic%E8%A7%A6%E5%8F%91%E5%8E%9F%E5%9B%A0"><span class="toc-number">1.2.1.</span> <span class="toc-text">panic触发原因</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#defer"><span class="toc-number">1.2.2.</span> <span class="toc-text">defer</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#recover"><span class="toc-number">1.2.3.</span> <span class="toc-text">recover</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fatal"><span class="toc-number">1.3.</span> <span class="toc-text">fatal</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Go-basic4.md
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">John Doe</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2026-07-28T11:28:33.000Z" class="dt-published" itemprop="datePublished">2026-07-28</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Go/" rel="tag">Go</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="Go的错误机制"><a href="#Go的错误机制" class="headerlink" title="Go的错误机制"></a>Go的错误机制</h2><p>Go中的错误分三种：<code>error</code>、<code>panic</code>、<code>fatal</code>，严重程度依次递增。</p>
+<h3 id="error"><a href="#error" class="headerlink" title="error"></a>error</h3><p>error是程序执行过程很正常的错误，类似Java的<code>Exception</code>，但发生error不会像Exception一样终止程序。<br>Go也没有<code>try-catch</code>的语法，需要显式将error作为返回值返回，手动判断是否发生错误。因此，Go也被称为<code>面向nil编程</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">funa</span><span class="params">(a, b <span class="type">int</span>)</span></span> (<span class="type">int</span>, <span class="type">error</span>) &#123;</span><br><span class="line">   <span class="keyword">return</span> a + b, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line">sum, err := funa(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">   fmt.Println(<span class="string">&quot;发生了error&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h4><ul>
+<li><code>errors.New(msg string)</code></li>
+<li><code>fmt.Errorf(msg string)</code></li>
+</ul>
+<p>但为了维护性，不会每次都创建临时error,而是创建常见错误的全局变量。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">var</span> (</span><br><span class="line">	ErrInvalid = fs.ErrInvalid <span class="comment">// &quot;invalid argument&quot;</span></span><br><span class="line"></span><br><span class="line">	ErrPermission = fs.ErrPermission <span class="comment">// &quot;permission denied&quot;</span></span><br><span class="line">	ErrExist      = fs.ErrExist      <span class="comment">// &quot;file already exists&quot;</span></span><br><span class="line">	ErrNotExist   = fs.ErrNotExist   <span class="comment">// &quot;file does not exist&quot;</span></span><br><span class="line">	ErrClosed     = fs.ErrClosed     <span class="comment">// &quot;file already closed&quot;</span></span><br><span class="line"></span><br><span class="line">	ErrNoDeadline       = errNoDeadline()       <span class="comment">// &quot;file type does not support deadline&quot;</span></span><br><span class="line">	ErrDeadlineExceeded = errDeadlineExceeded() <span class="comment">// &quot;i/o timeout&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<h4 id="error的定义"><a href="#error的定义" class="headerlink" title="error的定义"></a>error的定义</h4><p>error本质上就是一个接口，所有实现<code>Error() string</code>方法的结构体都是一个error</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> node <span class="keyword">struct</span> &#123;</span><br><span class="line">   a <span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n node)</span></span> Error() <span class="type">string</span> &#123;</span><br><span class="line">   <span class="keyword">return</span> <span class="string">&quot;node error&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="传递与错误链"><a href="#传递与错误链" class="headerlink" title="传递与错误链"></a>传递与错误链</h4><p>当多层函数调用时，在某个函数处发生了error,此时需要将error向上传递，且为了记录错误信息（原始错误信息和每一层场景信息，形成可排查的完整链路），会使用<code>%w</code>进行包裹（%w是fmt.Errorf专用的格式化输符）：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">// DAO</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">QueryUser</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">    _, err := sql.Query(...)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> fmt.Errorf(<span class="string">&quot;QueryUser: %w&quot;</span>, err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Service</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">GetUser</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">    err := QueryUser()</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> fmt.Errorf(<span class="string">&quot;GetUser: %w&quot;</span>, err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最终输出：<code>GetUser: QueryUser: sql: connection refused</code><br><strong>错误链的解析</strong></p>
+<ul>
+<li><code>errors.Unwrap(error err) error</code>。Unwrap函数只能解开<strong>一层包装</strong>，返回内层error  <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">rootErr := errors.New(<span class="string">&quot;connect failed&quot;</span>)</span><br><span class="line">e1 := fmt.Errorf(<span class="string">&quot;dao: %w&quot;</span>, rootErr)</span><br><span class="line">e2 := fmt.Errorf(<span class="string">&quot;service: %w&quot;</span>, e1)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 逐层拆</span></span><br><span class="line">errors.Unwrap(e2) <span class="comment">// e1</span></span><br><span class="line">errors.Unwrap(e1) <span class="comment">// rootErr</span></span><br><span class="line">errors.Unwrap(rootErr) <span class="comment">// nil</span></span><br></pre></td></tr></table></figure>
+  一般很少用Unwrap,而是用errors.As、errors.Is</li>
+<li><code>errors.Is(err, target error) bool</code>。<br>errors.Is沿着错误链不断Unwrap，用于判断错误链中是否有某个error,用于匹配<code>哨兵错误（sentinel error）</code>，例如 sql.ErrNoRows、自定义包级错误（即前面提到的全局error）  <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">NameNotFound := fmt.Errorf(<span class="string">&quot;Name Not Found&quot;</span>)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Query</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> fmt.Errorf(<span class="string">&quot;Query : %w&quot;</span>, NameNotFound)</span><br><span class="line">&#125;</span><br><span class="line">err := Query()</span><br><span class="line"><span class="keyword">if</span> errors.Is(err, NameNotFound) &#123;</span><br><span class="line">    fmt.Println(<span class="string">&quot;发生NameNotFound错误&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><code>errors.As(err error, target interface{}) bool</code><br>errors.As同样沿着错误链Unwrap,判断错误链中是否有错误可以赋值给目标错误类型的指针，即找到对应类型的错误，并将传进来的error指针指向该错误  <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> BizError <span class="keyword">struct</span> &#123;</span><br><span class="line">    Code <span class="type">int</span></span><br><span class="line">    Msg  <span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 实现error接口</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *BizError)</span></span> Error() <span class="type">string</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> e.Msg</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">GetUser</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">    err := &amp;BizError&#123;Code: <span class="number">4001</span>, Msg: <span class="string">&quot;用户不存在&quot;</span>&#125;</span><br><span class="line">    <span class="keyword">return</span> fmt.Errorf(<span class="string">&quot;get user: %w&quot;</span>, err)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">handler</span><span class="params">()</span></span> &#123;</span><br><span class="line">    err := GetUser()</span><br><span class="line">    <span class="keyword">var</span> bizErr *BizError</span><br><span class="line">    <span class="comment">// 遍历整条链，寻找类型匹配的错误</span></span><br><span class="line">    <span class="keyword">if</span> errors.As(err, &amp;bizErr) &#123;</span><br><span class="line">        fmt.Println(bizErr.Code) <span class="comment">// 拿到业务码4001</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="panic"><a href="#panic" class="headerlink" title="panic"></a>panic</h3><p>panic是Go中较严重的报错，会立刻停止程序并退出（error则不会导致程序终止），但在推出之前会进行善后（defer）。不过，panic可以被<code>recover</code>恢复。</p>
+<h4 id="panic触发原因"><a href="#panic触发原因" class="headerlink" title="panic触发原因"></a>panic触发原因</h4><ol>
+<li>手动 panic()： <code>panic(&quot;something wrong&quot;)</code>、<code>panic(err)</code></li>
+<li>数组、切片索引越界</li>
+<li>nil 指针解引用</li>
+<li>nil 函数调用 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> f <span class="function"><span class="keyword">func</span><span class="params">()</span></span></span><br><span class="line">f() <span class="comment">// nil function call</span></span><br></pre></td></tr></table></figure></li>
+<li>写入 nil map</li>
+<li>单返回类型断言失败</li>
+<li>向已关闭 channel send</li>
+<li>close nil channel</li>
+<li>Mutex 重复 Unlock</li>
+<li>无限递归栈溢出</li>
+</ol>
+<h4 id="defer"><a href="#defer" class="headerlink" title="defer"></a>defer</h4><p>defer关键字修饰的函数调用会在程序退出前执行，即使发生了panic,也会在调用完defer修饰函数后才退出。注意，触发panic后，先执行defer修饰函数，再执行panic<br>若有多条defer,会按代码顺序注册，并反序执行，即<code>栈</code>的顺序</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">defer</span> fmt.Println(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">    <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">            <span class="built_in">panic</span>(<span class="string">&quot;panicA&quot;</span>)</span><br><span class="line">            <span class="keyword">defer</span> fmt.Println(<span class="string">&quot;E&quot;</span>)</span><br><span class="line">        &#125;()</span><br><span class="line">    &#125;()</span><br><span class="line">    fmt.Println(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    dangerOp()</span><br><span class="line">    <span class="keyword">defer</span> fmt.Println(<span class="string">&quot;D&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">dangerOp</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">defer</span> fmt.Println(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">defer</span> fmt.Println(<span class="number">2</span>)</span><br><span class="line">    <span class="built_in">panic</span>(<span class="string">&quot;panicB&quot;</span>)</span><br><span class="line">    <span class="keyword">defer</span> fmt.Println(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">C</span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line">A</span><br><span class="line"><span class="built_in">panic</span>: panicB </span><br><span class="line">    <span class="built_in">panic</span>: panicA</span><br></pre></td></tr></table></figure>
+<h4 id="recover"><a href="#recover" class="headerlink" title="recover"></a>recover</h4><p>当发生panic时，使用内置函数<code>recover()</code>可以及时的处理并且保证程序继续运行，<strong>必须要在defer语句中运行</strong>，使用示例如下。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">   dangerOp()</span><br><span class="line">   fmt.Println(<span class="string">&quot;程序正常退出&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">dangerOp</span><span class="params">()</span></span> &#123;</span><br><span class="line">   <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">      <span class="keyword">if</span> err := <span class="built_in">recover</span>(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">         fmt.Println(err)</span><br><span class="line">         fmt.Println(<span class="string">&quot;panic恢复&quot;</span>)</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;()</span><br><span class="line">   <span class="built_in">panic</span>(<span class="string">&quot;发生panic&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">发生panic</span></span><br><span class="line"><span class="comment">panic恢复</span></span><br><span class="line"><span class="comment">程序正常退出</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+<p>关于<strong>必须要在defer语句中运行</strong>的规则，painc必须直接位于 defer 注册的那个函数体内，且recover 只能捕获直接包含它的 defer 函数正在处理的 panic。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">dangerOp</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;          <span class="comment">// 外层defer函数A</span></span><br><span class="line">        <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;            <span class="comment">// 内层匿名函数B</span></span><br><span class="line">            <span class="keyword">if</span> err := <span class="built_in">recover</span>(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">                fmt.Println(err)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;()</span><br><span class="line">    &#125;()</span><br><span class="line">    <span class="built_in">panic</span>(<span class="string">&quot;发生panic&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>此时 recover 是无法捕获 panic 的。</p>
+<h3 id="fatal"><a href="#fatal" class="headerlink" title="fatal"></a>fatal</h3><p>fatal是Go最严重的错误，触发fatal时，会立刻退出程序，不执行任何善后工作（defer），而无法被 recover 捕获。<br>fatal本质上就是<code>os.Exit()</code>的封装，常见的是<code>log.Fatal()</code>，比如：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">db, err := sql.Open(...)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    log.Fatal(<span class="string">&quot;数据库连接失败&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Go%E7%9A%84%E9%94%99%E8%AF%AF%E6%9C%BA%E5%88%B6"><span class="toc-number">1.</span> <span class="toc-text">Go的错误机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#error"><span class="toc-number">1.1.</span> <span class="toc-text">error</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA"><span class="toc-number">1.1.1.</span> <span class="toc-text">创建</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#error%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="toc-number">1.1.2.</span> <span class="toc-text">error的定义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%A0%E9%80%92%E4%B8%8E%E9%94%99%E8%AF%AF%E9%93%BE"><span class="toc-number">1.1.3.</span> <span class="toc-text">传递与错误链</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#panic"><span class="toc-number">1.2.</span> <span class="toc-text">panic</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#panic%E8%A7%A6%E5%8F%91%E5%8E%9F%E5%9B%A0"><span class="toc-number">1.2.1.</span> <span class="toc-text">panic触发原因</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#defer"><span class="toc-number">1.2.2.</span> <span class="toc-text">defer</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#recover"><span class="toc-number">1.2.3.</span> <span class="toc-text">recover</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fatal"><span class="toc-number">1.3.</span> <span class="toc-text">fatal</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2026/07/28/Go-basic4-md/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2026/07/28/Go-basic4-md/&text=Go-basic4.md"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2026/07/28/Go-basic4-md/&title=Go-basic4.md"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2026/07/28/Go-basic4-md/&is_video=false&description=Go-basic4.md"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go-basic4.md&body=Check out this article: http://example.com/2026/07/28/Go-basic4-md/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2026/07/28/Go-basic4-md/&title=Go-basic4.md"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2026/07/28/Go-basic4-md/&title=Go-basic4.md"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2026/07/28/Go-basic4-md/&title=Go-basic4.md"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2026/07/28/Go-basic4-md/&title=Go-basic4.md"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2026/07/28/Go-basic4-md/&name=Go-basic4.md&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2026/07/28/Go-basic4-md/&t=Go-basic4.md"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2026
+    John Doe
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

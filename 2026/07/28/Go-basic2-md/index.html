@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="new 和 makemake() 和 new() 都是Go中内存分配函数，make只适用于slcie、map、chan，返回类型对象；而new则适用于所有类型，返回类型指针。 new会直接在堆分配一块对应类型大小的内存并置零，但不会对slice的底层数组分配内存，所以不能用于slice、map、chan len 和 caplen函数用于计算已用的长度，如切片中元素的个数。而cap函数用于计算总共可">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go-basic2.md">
+<meta property="og:url" content="http://example.com/2026/07/28/Go-basic2-md/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="new 和 makemake() 和 new() 都是Go中内存分配函数，make只适用于slcie、map、chan，返回类型对象；而new则适用于所有类型，返回类型指针。 new会直接在堆分配一块对应类型大小的内存并置零，但不会对slice的底层数组分配内存，所以不能用于slice、map、chan len 和 caplen函数用于计算已用的长度，如切片中元素的个数。而cap函数用于计算总共可">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-07-28T11:28:24.000Z">
+<meta property="article:modified_time" content="2026-07-28T11:30:23.472Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Go">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Go-basic2.md</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2026/07/28/Go-basic3-md/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2026/07/25/Go%E7%9A%84%E7%BB%93%E6%9E%84%E4%BD%93-md/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2026/07/28/Go-basic2-md/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2026/07/28/Go-basic2-md/&text=Go-basic2.md"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2026/07/28/Go-basic2-md/&title=Go-basic2.md"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2026/07/28/Go-basic2-md/&is_video=false&description=Go-basic2.md"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go-basic2.md&body=Check out this article: http://example.com/2026/07/28/Go-basic2-md/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2026/07/28/Go-basic2-md/&title=Go-basic2.md"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2026/07/28/Go-basic2-md/&title=Go-basic2.md"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2026/07/28/Go-basic2-md/&title=Go-basic2.md"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2026/07/28/Go-basic2-md/&title=Go-basic2.md"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2026/07/28/Go-basic2-md/&name=Go-basic2.md&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2026/07/28/Go-basic2-md/&t=Go-basic2.md"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#new-%E5%92%8C-make"><span class="toc-number">1.</span> <span class="toc-text">new 和 make</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#len-%E5%92%8C-cap"><span class="toc-number">2.</span> <span class="toc-text">len 和 cap</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%87%E7%89%87"><span class="toc-number">3.</span> <span class="toc-text">切片</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E5%92%8C%E5%88%87%E7%89%87"><span class="toc-number">3.1.</span> <span class="toc-text">数组和切片</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E5%92%8C%E5%88%87%E7%89%87%E7%9A%84%E8%BD%AC%E6%8D%A2"><span class="toc-number">3.2.</span> <span class="toc-text">数组和切片的转换</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E7%BB%84-%E5%88%87%E7%89%87"><span class="toc-number">3.2.1.</span> <span class="toc-text">数组 -&gt; 切片</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%87%E7%89%87-%E6%95%B0%E7%BB%84"><span class="toc-number">3.2.2.</span> <span class="toc-text">切片 -&gt; 数组</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%83%E7%B4%A0%E6%8F%92%E5%85%A5%E3%80%81%E5%88%A0%E9%99%A4"><span class="toc-number">3.3.</span> <span class="toc-text">元素插入、删除</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8F%92%E5%85%A5"><span class="toc-number">3.3.1.</span> <span class="toc-text">插入</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A0%E9%99%A4"><span class="toc-number">3.3.2.</span> <span class="toc-text">删除</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">4.</span> <span class="toc-text">字符串</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E9%95%BF%E5%BA%A6"><span class="toc-number">4.1.</span> <span class="toc-text">字符串的长度</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#byte-%E5%92%8C-rune"><span class="toc-number">4.2.</span> <span class="toc-text">byte 和 rune</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#strings-Builder"><span class="toc-number">4.3.</span> <span class="toc-text">strings.Builder</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Go-basic2.md
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">John Doe</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2026-07-28T11:28:24.000Z" class="dt-published" itemprop="datePublished">2026-07-28</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Go/" rel="tag">Go</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="new-和-make"><a href="#new-和-make" class="headerlink" title="new 和 make"></a>new 和 make</h2><p><code>make()</code> 和 <code>new()</code> 都是Go中内存分配函数，make只适用于<code>slcie</code>、<code>map</code>、<code>chan</code>，返回<code>类型对象</code>；而new则适用于<strong>所有类型</strong>，返回<strong>类型指针</strong>。</p>
+<p>new会直接在堆分配一块对应类型大小的内存并置零，但不会对slice的底层数组分配内存，所以不能用于slice、map、chan</p>
+<h2 id="len-和-cap"><a href="#len-和-cap" class="headerlink" title="len 和 cap"></a>len 和 cap</h2><p>len函数用于计算<code>已用的长度</code>，如切片中元素的个数。而cap函数用于计算<code>总共可用的长度</code>，如切片底层数组的长度</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">slice := <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">10</span>)</span><br><span class="line">slice[<span class="number">0</span>] = <span class="number">1</span></span><br><span class="line">slice[<span class="number">1</span>] = <span class="number">2</span></span><br><span class="line">fmt.Println(<span class="built_in">len</span>(slice)    <span class="comment">// 2，切片中有两个元素</span></span><br><span class="line">fmt.Println(<span class="built_in">cap</span>(slice)    <span class="comment">// 10,切片的长度为10</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="切片"><a href="#切片" class="headerlink" title="切片"></a>切片</h2><h3 id="数组和切片"><a href="#数组和切片" class="headerlink" title="数组和切片"></a>数组和切片</h3><p>数组和切片的区别只在于，数组的大小不可变，同时数组只能用**<code>常量</code>**初始化，使用变量即会报错</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> num <span class="type">int</span> = <span class="number">10</span></span><br><span class="line"><span class="keyword">const</span> length = <span class="number">10</span></span><br><span class="line"><span class="keyword">var</span> arr [length]<span class="type">int</span>    <span class="comment">// 编译通过</span></span><br><span class="line"><span class="keyword">var</span> arrs [num]<span class="type">int</span>      <span class="comment">// 编译报错 num为变量</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="数组和切片的转换"><a href="#数组和切片的转换" class="headerlink" title="数组和切片的转换"></a>数组和切片的转换</h3><h4 id="数组-切片"><a href="#数组-切片" class="headerlink" title="数组 -&gt; 切片"></a>数组 -&gt; 切片</h4><ul>
+<li><p>切片表达式（切割）</p>
+<p><font color=orange>对数组进行切割时，返回的是一个与原数组共享底层数组的切片，当进行append等操作导致数组长度不足时，会进行扩容，此时才会摆脱原数组</font></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">arr := [<span class="number">5</span>]<span class="type">int</span>&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;</span><br><span class="line">slice := arr[<span class="number">1</span>:<span class="number">4</span>]</span><br><span class="line">fmt.Printf(<span class="string">&quot;%T&quot;</span>, slice)    <span class="comment">// []int</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>显式类型转换（低版本Go不支持）</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">arr := [<span class="number">5</span>]<span class="type">int</span>&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;</span><br><span class="line">slice := []<span class="type">int</span>(arr)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>copy，得到拷贝，不共享底层数组<font color=orange> 注意：copy() 是浅拷贝</font></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">arr := [<span class="number">5</span>]<span class="type">int</span>&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;</span><br><span class="line">slice := <span class="built_in">make</span>([]<span class="type">int</span>, <span class="built_in">len</span>(arr))</span><br><span class="line"><span class="built_in">copy</span>(slice, arr)    <span class="comment">// slice的数据和arr相同，但并不共享底层数组</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="切片-数组"><a href="#切片-数组" class="headerlink" title="切片 -&gt; 数组"></a>切片 -&gt; 数组</h4><ul>
+<li><p>转而数组指针（获取切片底层的数组，推荐只读场景）</p>
+<p><font color=red>注意：切片长度（<code>len(s)</code>）要 &gt;&#x3D; 数组长度，所以这种方式不能完全获取所有元素</font></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">s := []<span class="type">int</span>&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;</span><br><span class="line">arrP := (*[<span class="number">5</span>]<span class="type">int</span>)(s)</span><br><span class="line">fmt.Println(arrP[<span class="number">0</span>])    <span class="comment">// 1</span></span><br><span class="line">arrP[<span class="number">0</span>] = <span class="number">10</span></span><br><span class="line">fmt.Println(s[<span class="number">0</span>])    <span class="comment">// 10</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>由上述方法解引用</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">s := []<span class="type">int</span>&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;</span><br><span class="line">arr := *(*[<span class="number">5</span>]<span class="type">int</span>)(s)    <span class="comment">// []int</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="元素插入、删除"><a href="#元素插入、删除" class="headerlink" title="元素插入、删除"></a>元素插入、删除</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nums := []<span class="type">int</span>&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="插入"><a href="#插入" class="headerlink" title="插入"></a>插入</h4><ul>
+<li><p>头部插入</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// nums...表示将nums打散成一个个int变量</span></span><br><span class="line">nums = <span class="built_in">append</span>([]<span class="type">int</span>&#123;<span class="number">9</span>, <span class="number">10</span>&#125;, nums...)</span><br><span class="line">fmt.Println(nums)    <span class="comment">// [9, 10, 1, 2, 3, 4, 5]</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>中间插入</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">n := <span class="number">2</span></span><br><span class="line">nums := <span class="built_in">append</span>(nums[:n + <span class="number">1</span>, <span class="built_in">append</span>([]<span class="type">int</span>&#123;<span class="number">8</span>, <span class="number">9</span>&#125;, nums[n + <span class="number">1</span>:]...))</span><br><span class="line">fmt.Println(nums)    <span class="comment">// [1, 2, 8, 9, 3, 4, 5]</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>尾部插入</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nums := <span class="built_in">append</span>(nums, <span class="number">8</span>, <span class="number">9</span>)</span><br><span class="line">fmt.Println(nums)    <span class="comment">// [1, 2, 3, 4, 5, 8, 9]</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h4><p>切片的删除可直接用切片表达式、append直接拼接</p>
+<h2 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h2><h4 id="字符串的长度"><a href="#字符串的长度" class="headerlink" title="字符串的长度"></a>字符串的长度</h4><p>字符串本质是<code>byte[]</code>，len() 计算的也是字节切片的长度，所以就算中文字符串短于英语，但实际上得出的长度可能会更长</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">str1 := <span class="string">&quot;abcdefg&quot;</span></span><br><span class="line">str2 := <span class="string">&quot;测试abc&quot;</span></span><br><span class="line">fmt.Printf(<span class="string">&quot;str1: %d, str2: %d\n&quot;</span>, <span class="built_in">len</span>(str1), <span class="built_in">len</span>(str2))</span><br><span class="line"><span class="comment">// str1: 7, str2: 9</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="byte-和-rune"><a href="#byte-和-rune" class="headerlink" title="byte 和 rune"></a>byte 和 rune</h4><p>Golang中，字符串的本质是一个UTF-8编码的字节数组，所以直接通过索引访问字符串中的某个字符时，实际上输出的是字节：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">str := <span class="string">&quot;abc&quot;</span></span><br><span class="line">fmt.Println(str[<span class="number">0</span>])            <span class="comment">// 97</span></span><br><span class="line">fmt.Println(<span class="type">string</span>(str[<span class="number">0</span>]))    <span class="comment">// &quot;a&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>在<code>Unicode</code>中，不同字符的编码长度不同，ASCII码中的字符（如英语字母、数字等）只占一个字节，而中文往往占三个字节，这样就引出了<code>rune</code>，rune表示的是一个字符</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">str := <span class="string">&quot;中文测试&quot;</span></span><br><span class="line"><span class="keyword">for</span> idx, item := <span class="keyword">range</span> str &#123;</span><br><span class="line">    fmt.Printf(<span class="string">&quot;第%d个字符，字符：%c &quot;</span>, idx, item)</span><br><span class="line">    fmt.Println(item)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 第0个字符，字符：中 20013</span></span><br><span class="line"><span class="comment">// 第3个字符，字符：文 25991</span></span><br><span class="line"><span class="comment">// 第6个字符，字符：测 27979</span></span><br><span class="line"><span class="comment">// 第9个字符，字符：试 35797</span></span><br><span class="line">runes := []<span class="type">rune</span>(str)</span><br><span class="line">fmt.Println(<span class="type">string</span>(runes))    <span class="comment">// 中文测试</span></span><br></pre></td></tr></table></figure>
+
+<p>从上面的例子还可以发现，idx表示的不是字符索引，而是字节的索引，这种情况只会出现在遍历字符串中，其他情况都是正常的</p>
+<h4 id="strings-Builder"><a href="#strings-Builder" class="headerlink" title="strings.Builder"></a>strings.Builder</h4><p>Golang拼接字符串可通过 + 或转为字节切片再添加元素的方式，但性能都较差，可通过strings.Builder来进行拼接</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">builder := strings.Builder&#123;&#125;</span><br><span class="line">builder.WriteString(<span class="string">&quot;this is a string &quot;</span>)</span><br><span class="line">builder.WriteString(<span class="string">&quot;that is a int&quot;</span>)</span><br><span class="line">fmt.Println(builder.String())</span><br></pre></td></tr></table></figure>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#new-%E5%92%8C-make"><span class="toc-number">1.</span> <span class="toc-text">new 和 make</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#len-%E5%92%8C-cap"><span class="toc-number">2.</span> <span class="toc-text">len 和 cap</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%87%E7%89%87"><span class="toc-number">3.</span> <span class="toc-text">切片</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E5%92%8C%E5%88%87%E7%89%87"><span class="toc-number">3.1.</span> <span class="toc-text">数组和切片</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E5%92%8C%E5%88%87%E7%89%87%E7%9A%84%E8%BD%AC%E6%8D%A2"><span class="toc-number">3.2.</span> <span class="toc-text">数组和切片的转换</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E7%BB%84-%E5%88%87%E7%89%87"><span class="toc-number">3.2.1.</span> <span class="toc-text">数组 -&gt; 切片</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%87%E7%89%87-%E6%95%B0%E7%BB%84"><span class="toc-number">3.2.2.</span> <span class="toc-text">切片 -&gt; 数组</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%83%E7%B4%A0%E6%8F%92%E5%85%A5%E3%80%81%E5%88%A0%E9%99%A4"><span class="toc-number">3.3.</span> <span class="toc-text">元素插入、删除</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8F%92%E5%85%A5"><span class="toc-number">3.3.1.</span> <span class="toc-text">插入</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A0%E9%99%A4"><span class="toc-number">3.3.2.</span> <span class="toc-text">删除</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">4.</span> <span class="toc-text">字符串</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E9%95%BF%E5%BA%A6"><span class="toc-number">4.1.</span> <span class="toc-text">字符串的长度</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#byte-%E5%92%8C-rune"><span class="toc-number">4.2.</span> <span class="toc-text">byte 和 rune</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#strings-Builder"><span class="toc-number">4.3.</span> <span class="toc-text">strings.Builder</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2026/07/28/Go-basic2-md/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2026/07/28/Go-basic2-md/&text=Go-basic2.md"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2026/07/28/Go-basic2-md/&title=Go-basic2.md"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2026/07/28/Go-basic2-md/&is_video=false&description=Go-basic2.md"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go-basic2.md&body=Check out this article: http://example.com/2026/07/28/Go-basic2-md/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2026/07/28/Go-basic2-md/&title=Go-basic2.md"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2026/07/28/Go-basic2-md/&title=Go-basic2.md"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2026/07/28/Go-basic2-md/&title=Go-basic2.md"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2026/07/28/Go-basic2-md/&title=Go-basic2.md"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2026/07/28/Go-basic2-md/&name=Go-basic2.md&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2026/07/28/Go-basic2-md/&t=Go-basic2.md"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2026
+    John Doe
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

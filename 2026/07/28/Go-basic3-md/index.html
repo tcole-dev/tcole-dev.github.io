@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="函数与方法Golang中的函数和方法的区别在于方法具有接收者。且函数是一等公民，可以直接声明函数变量，也就是函数式编程。 变长参数Golang中可以通过...int传递不定长个参数，本质上变长参数其实是切片，但不能直接传入切片，而是使用 slice... 123456789slice :&#x3D; []int&#123;1, 2, 3, 4, 5&#125;func funca(nums ...int)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go-basic3.md">
+<meta property="og:url" content="http://example.com/2026/07/28/Go-basic3-md/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="函数与方法Golang中的函数和方法的区别在于方法具有接收者。且函数是一等公民，可以直接声明函数变量，也就是函数式编程。 变长参数Golang中可以通过...int传递不定长个参数，本质上变长参数其实是切片，但不能直接传入切片，而是使用 slice... 123456789slice :&#x3D; []int&#123;1, 2, 3, 4, 5&#125;func funca(nums ...int)">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-07-28T11:28:29.000Z">
+<meta property="article:modified_time" content="2026-07-28T11:30:00.658Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Go">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Go-basic3.md</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2026/07/28/Go-basic4-md/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2026/07/28/Go-basic2-md/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2026/07/28/Go-basic3-md/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2026/07/28/Go-basic3-md/&text=Go-basic3.md"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2026/07/28/Go-basic3-md/&title=Go-basic3.md"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2026/07/28/Go-basic3-md/&is_video=false&description=Go-basic3.md"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go-basic3.md&body=Check out this article: http://example.com/2026/07/28/Go-basic3-md/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2026/07/28/Go-basic3-md/&title=Go-basic3.md"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2026/07/28/Go-basic3-md/&title=Go-basic3.md"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2026/07/28/Go-basic3-md/&title=Go-basic3.md"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2026/07/28/Go-basic3-md/&title=Go-basic3.md"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2026/07/28/Go-basic3-md/&name=Go-basic3.md&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2026/07/28/Go-basic3-md/&t=Go-basic3.md"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E4%B8%8E%E6%96%B9%E6%B3%95"><span class="toc-number">1.</span> <span class="toc-text">函数与方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0"><span class="toc-number">1.1.</span> <span class="toc-text">变长参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%94%E5%9B%9E%E5%80%BC"><span class="toc-number">1.2.</span> <span class="toc-text">返回值</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A5%E5%8F%A3"><span class="toc-number">2.</span> <span class="toc-text">接口</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A9%BA%E6%8E%A5%E5%8F%A3"><span class="toc-number">2.1.</span> <span class="toc-text">空接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B%E7%BA%A6%E6%9D%9F%E6%8E%A5%E5%8F%A3"><span class="toc-number">2.2.</span> <span class="toc-text">类型约束接口</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%9B%E5%9E%8B"><span class="toc-number">3.</span> <span class="toc-text">泛型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%9B%E5%9E%8B%E6%B3%A8%E6%84%8F%E7%82%B9"><span class="toc-number">3.1.</span> <span class="toc-text">泛型注意点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B%E9%9B%86"><span class="toc-number">3.2.</span> <span class="toc-text">类型集</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E9%9B%86%E6%8E%A5%E5%8F%A3%E3%80%81%E7%B1%BB%E5%9E%8B%E9%9B%86%E6%8E%A5%E5%8F%A3%E3%80%81%E6%B7%B7%E5%90%88%E6%8E%A5%E5%8F%A3"><span class="toc-number">4.</span> <span class="toc-text">方法集接口、类型集接口、混合接口</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Go-basic3.md
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">John Doe</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2026-07-28T11:28:29.000Z" class="dt-published" itemprop="datePublished">2026-07-28</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Go/" rel="tag">Go</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="函数与方法"><a href="#函数与方法" class="headerlink" title="函数与方法"></a>函数与方法</h2><p>Golang中的函数和方法的区别在于方法具有接收者。且函数是一等公民，可以直接声明函数变量，也就是函数式编程。</p>
+<h3 id="变长参数"><a href="#变长参数" class="headerlink" title="变长参数"></a>变长参数</h3><p>Golang中可以通过<code>...int</code>传递不定长个参数，本质上变长参数其实是切片，但不能直接传入切片，而是使用 <code>slice...</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">slice := []<span class="type">int</span>&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">funca</span><span class="params">(nums ...<span class="type">int</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> _, val := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        fmt.Println(val)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    funca(slcie...)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="返回值"><a href="#返回值" class="headerlink" title="返回值"></a>返回值</h3><ul>
+<li><p>Golang原生支持多个返回值</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">funa</span><span class="params">()</span></span> (<span class="type">int</span>, <span class="type">int</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>, <span class="number">2</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>返回值名称。Go的返回值除了类型还可以有名称，在对返回值命名后，相当于在函数起始声明了返回值，可直接使用。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">sum</span><span class="params">(a, b <span class="type">int</span>)</span></span> (sum <span class="type">int</span>) &#123;</span><br><span class="line">    sum = a + b</span><br><span class="line">    <span class="keyword">return</span> </span><br><span class="line">    <span class="comment">// 返回值带有名称且不显式写明返回的变量，则默认返回命名的返回值</span></span><br><span class="line">    <span class="comment">// 等价于return sum</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="接口"><a href="#接口" class="headerlink" title="接口"></a>接口</h2><p>Golang的接口是隐式实现，不需要像Java一样的implement主动声明，只要某个类型实现了某个接口中的所有方法，即视为其实现了该接口。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Runnable <span class="keyword">interface</span> &#123;</span><br><span class="line">    Run() &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Dog <span class="keyword">struct</span> &#123;</span><br><span class="line">    Name <span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(d Dog)</span></span> Run() &#123; fmt.Println(<span class="string">&quot;Run&quot;</span>) &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> r Runnable</span><br><span class="line">    r = Dog&#123;Name: <span class="string">&quot;dog&quot;</span>&#125;</span><br><span class="line">    r.Run()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="空接口"><a href="#空接口" class="headerlink" title="空接口"></a>空接口</h3><p>interface{} 中未声明任何待实现方法，所以<code>interface{}</code> 是所有类型的父级，类似Java的Object,所以 interface{} 也等价于 any</p>
+<h3 id="类型约束接口"><a href="#类型约束接口" class="headerlink" title="类型约束接口"></a>类型约束接口</h3><p>在Go.1.18引入泛型后，使用了接口来实现<code>类型集</code>，只要接口内部包含类型的，即为类型约束接口：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> Addable <span class="keyword">interface</span> &#123;</span><br><span class="line">    <span class="type">int</span> | <span class="type">float64</span> | ~<span class="type">uint8</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><font color=orange><code>~uint8</code>表示所有底层类型为 uint8 的类型，如 <code>type newType uint8</code> ，~uint8 可匹配到 newType </font></p>
+<p>类型约束接口只用于泛型参数。</p>
+<h2 id="泛型"><a href="#泛型" class="headerlink" title="泛型"></a>泛型</h2><h3 id="泛型注意点"><a href="#泛型注意点" class="headerlink" title="泛型注意点"></a>泛型注意点</h3><ul>
+<li><p>泛型不能作为基本类型</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> NewType[<span class="type">int</span> | <span class="type">int32</span>] <span class="type">int</span>    <span class="comment">// 报错</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>泛型类型无法使用断言</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">sum</span>[<span class="title">T</span> <span class="title">int</span> | <span class="title">int32</span>]<span class="params">(a, b T)</span></span> T &#123;</span><br><span class="line">    ints, ok := a.(<span class="type">int</span>)    <span class="comment">// 报错</span></span><br><span class="line">    <span class="keyword">switch</span> a.(<span class="keyword">type</span>) &#123;      <span class="comment">// 报错</span></span><br><span class="line">        <span class="keyword">case</span> <span class="type">int</span>:</span><br><span class="line">        <span class="keyword">case</span> <span class="type">int32</span>:</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>匿名结构体、函数不支持泛型</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 匿名结构体</span></span><br><span class="line">testStruct := <span class="keyword">struct</span>[T <span class="type">int</span> | <span class="type">byte</span>] &#123;</span><br><span class="line">    a T</span><br><span class="line">    b <span class="type">string</span></span><br><span class="line">&#125;[<span class="type">int</span>]&#123;</span><br><span class="line">    a: <span class="number">10</span>,</span><br><span class="line">    b: <span class="string">&quot;test&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 匿名函数</span></span><br><span class="line">funa := <span class="function"><span class="keyword">func</span>[<span class="title">T</span> <span class="title">int</span> | <span class="title">byte</span>]<span class="params">(a T)</span></span> T &#123;&#125; </span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>但匿名函数可使用已有的泛型</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Sum</span>[<span class="title">T</span> <span class="title">int</span> | <span class="title">float64</span>]<span class="params">(a, b T)</span></span> T &#123;</span><br><span class="line">	sub := <span class="function"><span class="keyword">func</span><span class="params">(c, d T)</span></span> T &#123;</span><br><span class="line">		<span class="keyword">return</span> c - d</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> sub(a,b) + a + b</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>不支持泛型方法，但接受者可以是泛型（即不支持额外的新泛型类型参数）</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> structType[T <span class="type">int</span> | <span class="type">byte</span>] <span class="keyword">struct</span> &#123;</span><br><span class="line">    a T</span><br><span class="line">    b <span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s structType[T])</span></span> funa(a, b T) T &#123;&#125;                    <span class="comment">// 正确</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s structType[T])</span></span> funb[K <span class="type">string</span> | <span class="type">uint8</span>](k K) K &#123;&#125;     <span class="comment">// 报错</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="类型集"><a href="#类型集" class="headerlink" title="类型集"></a>类型集</h3><ul>
+<li><p>并集</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Addable <span class="keyword">interface</span> &#123;</span><br><span class="line">    <span class="type">int</span> | <span class="type">int</span> <span class="number">32</span> | <span class="type">int64</span> | <span class="type">float64</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>交集</p>
+<p>如果一个接口包含多个非空类型集，那么该接口就是这些类型集的交集，例子如下:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> SignedInt <span class="keyword">interface</span> &#123;</span><br><span class="line">   <span class="type">int8</span> | <span class="type">int16</span> | <span class="type">int</span> | <span class="type">int32</span> | <span class="type">int64</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Integer <span class="keyword">interface</span> &#123;</span><br><span class="line">   <span class="type">int8</span> | <span class="type">int16</span> | <span class="type">int</span> | <span class="type">int32</span> | <span class="type">int64</span> | <span class="type">uint8</span> | <span class="type">uint16</span> | <span class="type">uint</span> | <span class="type">uint32</span> | <span class="type">uint64</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Number <span class="keyword">interface</span> &#123;</span><br><span class="line">	SignedInt</span><br><span class="line">	Int</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Do</span>[<span class="title">T</span> <span class="title">Number</span>]<span class="params">(n T)</span></span> T &#123;</span><br><span class="line">   <span class="keyword">return</span> n</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Do[<span class="type">int</span>](<span class="number">2</span>)</span><br><span class="line">DO[<span class="type">uint</span>](<span class="number">2</span>) <span class="comment">//无法通过编译</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>空集</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> interface1 <span class="keyword">interface</span> &#123;</span><br><span class="line">    <span class="type">int</span> | <span class="type">int32</span> | <span class="type">int64</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> interface2 <span class="keyword">interface</span> &#123;</span><br><span class="line">    <span class="type">float32</span> | <span class="type">float64</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> interface3 <span class="keyword">interface</span> &#123;    <span class="comment">// 此时的interface3是一个空集</span></span><br><span class="line">    interface1</span><br><span class="line">    interface2</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Do[any](<span class="number">1</span>)   <span class="comment">// 此时就算传入any也无法通过编译</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="方法集接口、类型集接口、混合接口"><a href="#方法集接口、类型集接口、混合接口" class="headerlink" title="方法集接口、类型集接口、混合接口"></a>方法集接口、类型集接口、混合接口</h2><ul>
+<li>方法集接口：仅含有方法的接口</li>
+<li>类型集接口：仅含有类型的接口</li>
+<li>混合接口：包含方法和类型的接口，实际上，只要有 <code>|</code> 即认定为类型集接口，可以说混合接口就是类型集接口</li>
+</ul>
+<p><strong>用处区别</strong></p>
+<table>
+<thead>
+<tr>
+<th>接口类型</th>
+<th>能否定义变量 &#x2F; 运行时多态</th>
+<th>能否做类型实参</th>
+<th>主要用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>仅方法</td>
+<td>可以</td>
+<td>可以</td>
+<td>运行时多态；泛型行为约束</td>
+</tr>
+<tr>
+<td>仅类型</td>
+<td>不可以</td>
+<td>不可以</td>
+<td>泛型约束；限定底层类型</td>
+</tr>
+<tr>
+<td>混合</td>
+<td>不可以</td>
+<td>不可以</td>
+<td>泛型约束；限定底层类型</td>
+</tr>
+</tbody></table>
+<p><strong><font color=red>泛型约束和类型实参</font></strong> <font color=brown>以下面的泛型函数为例：<br> <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> inter1 <span class="keyword">interface</span> &#123;</span><br><span class="line">  <span class="type">int</span> | <span class="type">float64</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">sum</span>[<span class="title">T</span> <span class="title">inter1</span>]<span class="params">(a, b T)</span></span> T &#123;</span><br><span class="line">  <span class="keyword">return</span> a + b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ans := sum[<span class="type">int</span>](<span class="number">1</span>, <span class="number">2</span>)</span><br></pre></td></tr></table></figure><br>在这段代码中，<code>sum</code>函数中，<code>inter1</code>是泛型约束，而<code>T</code>则是类型参数，调用sum时传入的<code>int</code>则为类型实参。<br>任何包含<code>方法</code>的接口（类型集接口）均无法作为类型实参，只能写在函数定义中<code>inter1</code>的位置。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> inter2 <span class="keyword">interface</span> &#123;</span><br><span class="line">   <span class="type">int</span> | <span class="type">float64</span></span><br><span class="line">   toString() <span class="type">string</span> &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">sum</span>[<span class="title">T</span> <span class="title">inter2</span>]<span class="params">(a, b T)</span></span> T &#123;&#125;    <span class="comment">// 正确</span></span><br><span class="line">sum[inter2](<span class="number">1</span>, <span class="number">2</span>)  <span class="comment">// 报错</span></span><br><span class="line">sum[<span class="type">int</span>](<span class="number">1</span> <span class="number">2</span>)      <span class="comment">// 正确</span></span><br></pre></td></tr></table></figure>
+</font>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E4%B8%8E%E6%96%B9%E6%B3%95"><span class="toc-number">1.</span> <span class="toc-text">函数与方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0"><span class="toc-number">1.1.</span> <span class="toc-text">变长参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%94%E5%9B%9E%E5%80%BC"><span class="toc-number">1.2.</span> <span class="toc-text">返回值</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A5%E5%8F%A3"><span class="toc-number">2.</span> <span class="toc-text">接口</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A9%BA%E6%8E%A5%E5%8F%A3"><span class="toc-number">2.1.</span> <span class="toc-text">空接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B%E7%BA%A6%E6%9D%9F%E6%8E%A5%E5%8F%A3"><span class="toc-number">2.2.</span> <span class="toc-text">类型约束接口</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%9B%E5%9E%8B"><span class="toc-number">3.</span> <span class="toc-text">泛型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%9B%E5%9E%8B%E6%B3%A8%E6%84%8F%E7%82%B9"><span class="toc-number">3.1.</span> <span class="toc-text">泛型注意点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B%E9%9B%86"><span class="toc-number">3.2.</span> <span class="toc-text">类型集</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E9%9B%86%E6%8E%A5%E5%8F%A3%E3%80%81%E7%B1%BB%E5%9E%8B%E9%9B%86%E6%8E%A5%E5%8F%A3%E3%80%81%E6%B7%B7%E5%90%88%E6%8E%A5%E5%8F%A3"><span class="toc-number">4.</span> <span class="toc-text">方法集接口、类型集接口、混合接口</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2026/07/28/Go-basic3-md/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2026/07/28/Go-basic3-md/&text=Go-basic3.md"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2026/07/28/Go-basic3-md/&title=Go-basic3.md"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2026/07/28/Go-basic3-md/&is_video=false&description=Go-basic3.md"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go-basic3.md&body=Check out this article: http://example.com/2026/07/28/Go-basic3-md/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2026/07/28/Go-basic3-md/&title=Go-basic3.md"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2026/07/28/Go-basic3-md/&title=Go-basic3.md"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2026/07/28/Go-basic3-md/&title=Go-basic3.md"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2026/07/28/Go-basic3-md/&title=Go-basic3.md"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2026/07/28/Go-basic3-md/&name=Go-basic3.md&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2026/07/28/Go-basic3-md/&t=Go-basic3.md"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2026
+    John Doe
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
