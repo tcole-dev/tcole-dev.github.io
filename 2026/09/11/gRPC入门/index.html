@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="gRPC框架入门gRPC使用的前置配置protobuf 编译器gRPC框架是跨语言的，需要使用.proto文件声明具体接口，protobuf编译器搭配不同语言的插件，可将同一份.proto文件编译并生成对应语言的代码，rpc服务调用远程主机的接口其实就是调用生成的文件中的接口。编译器地址：https:&#x2F;&#x2F;github.com&#x2F;protocolbuffers&#x2F;protobuf&#x2F;releases下载解">
+<meta property="og:type" content="article">
+<meta property="og:title" content="gRPC入门">
+<meta property="og:url" content="http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="gRPC框架入门gRPC使用的前置配置protobuf 编译器gRPC框架是跨语言的，需要使用.proto文件声明具体接口，protobuf编译器搭配不同语言的插件，可将同一份.proto文件编译并生成对应语言的代码，rpc服务调用远程主机的接口其实就是调用生成的文件中的接口。编译器地址：https:&#x2F;&#x2F;github.com&#x2F;protocolbuffers&#x2F;protobuf&#x2F;releases下载解">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-09-11T12:33:18.000Z">
+<meta property="article:modified_time" content="2026-09-11T12:35:03.044Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Go">
+<meta property="article:tag" content="RPC">
+<meta property="article:tag" content="web">
+<meta property="article:tag" content="框架">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>gRPC入门</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2026/09/09/%E5%B8%B8%E7%94%A8%E5%88%86%E9%A1%B5%E6%96%B9%E5%BC%8F/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&text=gRPC入门"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&title=gRPC入门"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&is_video=false&description=gRPC入门"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=gRPC入门&body=Check out this article: http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&title=gRPC入门"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&title=gRPC入门"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&title=gRPC入门"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&title=gRPC入门"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&name=gRPC入门&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&t=gRPC入门"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#gRPC%E6%A1%86%E6%9E%B6%E5%85%A5%E9%97%A8"><span class="toc-number">1.</span> <span class="toc-text">gRPC框架入门</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#gRPC%E4%BD%BF%E7%94%A8%E7%9A%84%E5%89%8D%E7%BD%AE%E9%85%8D%E7%BD%AE"><span class="toc-number">1.1.</span> <span class="toc-text">gRPC使用的前置配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#protobuf-%E7%BC%96%E8%AF%91%E5%99%A8"><span class="toc-number">1.1.1.</span> <span class="toc-text">protobuf 编译器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AD%E8%A8%80%E6%8F%92%E4%BB%B6"><span class="toc-number">1.1.2.</span> <span class="toc-text">语言插件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#gRPC%E5%BC%80%E5%8F%91%E6%B5%81%E7%A8%8B"><span class="toc-number">1.2.</span> <span class="toc-text">gRPC开发流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#protocbuf%E7%BC%96%E5%86%99"><span class="toc-number">1.3.</span> <span class="toc-text">protocbuf编写</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%81%E5%BC%8FRPC"><span class="toc-number">1.4.</span> <span class="toc-text">流式RPC</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#gRPC%E4%BD%BF%E7%94%A8"><span class="toc-number">1.5.</span> <span class="toc-text">gRPC使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.5.1.</span> <span class="toc-text">服务端示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.5.2.</span> <span class="toc-text">客户端示例</span></a></li></ol></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        gRPC入门
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">John Doe</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2026-09-11T12:33:18.000Z" class="dt-published" itemprop="datePublished">2026-09-11</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Go/" rel="tag">Go</a>, <a class="p-category" href="/tags/RPC/" rel="tag">RPC</a>, <a class="p-category" href="/tags/web/" rel="tag">web</a>, <a class="p-category" href="/tags/%E6%A1%86%E6%9E%B6/" rel="tag">框架</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h1 id="gRPC框架入门"><a href="#gRPC框架入门" class="headerlink" title="gRPC框架入门"></a>gRPC框架入门</h1><h2 id="gRPC使用的前置配置"><a href="#gRPC使用的前置配置" class="headerlink" title="gRPC使用的前置配置"></a>gRPC使用的前置配置</h2><h3 id="protobuf-编译器"><a href="#protobuf-编译器" class="headerlink" title="protobuf 编译器"></a>protobuf 编译器</h3><p>gRPC框架是跨语言的，需要使用<code>.proto</code>文件声明具体接口，protobuf编译器搭配不同语言的插件，可将同一份.proto文件编译并生成对应语言的代码，rpc服务调用远程主机的接口其实就是调用生成的文件中的接口。<br><strong>编译器地址：<a target="_blank" rel="noopener" href="https://github.com/protocolbuffers/protobuf/releases">https://github.com/protocolbuffers/protobuf/releases</a></strong><br>下载解压后，将<code>bin</code>加入PATH环境变量，可使用<code>protoc --version</code>验证安装是否成功</p>
+<h3 id="语言插件"><a href="#语言插件" class="headerlink" title="语言插件"></a>语言插件</h3><p>后续均以<code>Go</code>为例。Go（gRPC）需要下载的插件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># go 代码生成插件 protoc‑gen‑go</span></span><br><span class="line">go install google.golang.org/protobuf/cmd/protoc-gen-go@latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># gRPC 代码生成插件 protoc‑gen‑go‑grpc</span></span><br><span class="line">go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest</span><br></pre></td></tr></table></figure>
+<p>使用命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">protoc --go_out=. --g0-grpc_out=. ./helle.proto</span><br></pre></td></tr></table></figure>
+<p><code>protoc</code>使用protocbuf编译器进行编译，<code>--go_out=.</code>表示输出目录为当前目录，<code>--go-grpc=.</code>表示输出目录为当前目录，<code>./hello.proto</code>表示要编译的proto代码文件<br>执行该命令后，会生成两个go文件：</p>
+<ul>
+<li>xxx.pb.go。由<code>protoc-gen-go</code>插件生成，由protoc编译的元数据生成，只负责将protocbuf中的消息、服务翻译成go的结构体、方法等</li>
+<li>xxx_grpc.pb.go。由<code>protoc-gen-go-grpc</code>插件生成，同样有protoc编译的元数据生成，负责生成grpc所需的各种方法、服务端、客户端实现，网络调用，使用grpc时实际调用的接口即属于该文件</li>
+</ul>
+<p>因此，若不使用gRPC时，可不下载protoc-gen-go-grpc,如<code>kratos</code>框架：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http@latest</span><br><span class="line">go install github.com/go-kratos/kratos/cmd/protoc-gen-go-errors@latest</span><br></pre></td></tr></table></figure>
+
+<h2 id="gRPC开发流程"><a href="#gRPC开发流程" class="headerlink" title="gRPC开发流程"></a>gRPC开发流程</h2><ol>
+<li>编写protoc代码<br>protocol buffers,一种无语言、平台无关的数据序列化机制，也是gRPC和大部分RPC框架的默认序列化方式。特点是跨语言、二进制、强类型</li>
+<li>生成代码。通过protoc编译器、不同语言插件&#x2F;工具，生成对应语言代码</li>
+<li>编写业务代码。调用生成的客户端暴露出的接口</li>
+</ol>
+<h2 id="protocbuf编写"><a href="#protocbuf编写" class="headerlink" title="protocbuf编写"></a>protocbuf编写</h2><p>本文只简单叙述protocbuf格式，不具体说明<br>示例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">syntax = &quot;proto3&quot;;</span><br><span class="line"></span><br><span class="line">option go_package = &quot;./pb;hello_pb&quot;;</span><br><span class="line"></span><br><span class="line">message HelloRequest &#123;</span><br><span class="line">  string name = 1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">message HelloResponse &#123;</span><br><span class="line">  string message = 1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">service HelloService &#123;</span><br><span class="line">  rpc SayHello(HelloRequest) returns (HelloResponse);</span><br><span class="line"></span><br><span class="line">  rpc SayHelloStream(HelloRequest) returns (stream HelloResponse);</span><br><span class="line"></span><br><span class="line">  rpc SayHelloStreamClient(stream HelloRequest) returns (HelloResponse);</span><br><span class="line"></span><br><span class="line">  rpc SayHelloStreamBoth(stream HelloRequest) returns (stream HelloResponse);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最重要的几点：</p>
+<ul>
+<li><code>syntax</code> 表示protocbuf的版本，可直接写proto3,表示<code>protocol buffer v3</code></li>
+<li><code>option go_package</code> 表示<code>生成的路径;go的包名</code>，如上面的<code>&quot;./pb;hello_pb&quot;</code>，在上面编译命令指定 <code>.</code> 路径时，两个go文件生成的目录将会是 <code>./pb/</code>，两个go文件的包为hello_pb</li>
+<li><code>message</code> 表示定义一个消息，直接当成go的结构体即可，每个字段的序号不可相同</li>
+<li><code>service</code> 表示一个服务，类似 Gin 的一个路由组，其中可声明多个方法，类似一个具体路由</li>
+<li><code>stream</code> 表示流式RPC</li>
+</ul>
+<h2 id="流式RPC"><a href="#流式RPC" class="headerlink" title="流式RPC"></a>流式RPC</h2><ul>
+<li>一元RPC,接收一个RPC请求，返回一个RPC响应，与HTTP类似  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpc SayHello(HelloRequest) returns (HelloResponse)</span><br></pre></td></tr></table></figure></li>
+<li>服务端流式RPC  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpc SayHello(HelloRequest) returns (stream HelloResponse);</span><br></pre></td></tr></table></figure>
+  即接收一个请求后，服务端连续发送多条响应，gRPC保证其有序</li>
+<li>客户端流式RPC  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpc SayHello(stream HelloRequest) returns (HelloResponse)</span><br></pre></td></tr></table></figure>
+  连续接收多个RPC请求后，返回一个响应，同样由gRPC保证有序</li>
+<li>双端流式RPC  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpc SayHello(stream HelloRequest) returns (stream HelloResponse)</span><br></pre></td></tr></table></figure>
+  可接收连续请求并返回连续响应。<br>  <font color=orange>只有双端流式RPC才能全双工通信，可以做到一边接收请求，一边返回响应</font></li>
+</ul>
+<h2 id="gRPC使用"><a href="#gRPC使用" class="headerlink" title="gRPC使用"></a>gRPC使用</h2><h3 id="服务端示例"><a href="#服务端示例" class="headerlink" title="服务端示例"></a>服务端示例</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> HelloService <span class="keyword">struct</span> &#123;</span><br><span class="line">    hello_pb.UnimplementedHelloServiceServer</span><br><span class="line">    <span class="comment">// 相当于HelloService继承自动生成的该Server</span></span><br><span class="line">    <span class="comment">// 该Server中实现的各RPC接口均为空实现（直接返回status.Error()）。必须手动实现各方法。</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 一元RPC</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *HelloService)</span></span> SayHello(ctx context.Context, req *hello_pb.HelloRequest) (*hello_pb.HelloResponse, <span class="type">error</span>) &#123;</span><br><span class="line">    log.Println(<span class="string">&quot;Get Request: &quot;</span>, req.Name)</span><br><span class="line">    <span class="keyword">return</span> &amp;hello_pb.HelloResponse&#123;</span><br><span class="line">        Message: <span class="string">&quot;Hello &quot;</span> + req.Name,</span><br><span class="line">    &#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="comment">// 1. 获取监听器</span></span><br><span class="line">    lis, err := net.Listen(<span class="string">&quot;tcp&quot;</span>, <span class="string">&quot;:8080&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Panic(err)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 创建gRPC服务器</span></span><br><span class="line">    s := grpc.NewServer()</span><br><span class="line">    <span class="comment">// 3. 注册服务</span></span><br><span class="line">    hello_pb.RegisterHelloServiceServer(s, &amp;HelloService&#123;&#125;)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 4. 开启服务器</span></span><br><span class="line">    err = s.Serve(lis)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Panic(err)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>流式RPC服务端</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 服务端流式RPC</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *HelloService)</span></span> SayHelloServerStream(req *hello_pb.HelloRequest, stream hello_pb.HelloService_SayHelloServerStreamServer) <span class="type">error</span> &#123;</span><br><span class="line">    words := []<span class="type">string</span>&#123;</span><br><span class="line">        <span class="string">&quot;Hello&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Bonjour&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Hola&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Hallo&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Ciao&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Ciallo~&quot;</span>,</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> _, word := <span class="keyword">range</span> words &#123;</span><br><span class="line">        data := &amp;hello_pb.HelloResponse&#123;Message: word&#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> err := stream.Send(data); err != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> err</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 客户端流式RPC</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *HelloService)</span></span> SayHelloClientStream(stream hello_pb.HelloService_SayHelloClientStreamServer) <span class="type">error</span> &#123;</span><br><span class="line">    re := <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        req, err := stream.Recv()</span><br><span class="line">        <span class="keyword">if</span> err == io.EOF &#123;</span><br><span class="line">            fmt.Println(<span class="string">&quot;Request: &quot;</span>, re)</span><br><span class="line">            <span class="keyword">return</span> stream.SendAndClose(&amp;hello_pb.HelloResponse&#123;</span><br><span class="line">                Message: <span class="string">&quot;Get All Request From SayHelloClientStream&quot;</span>,</span><br><span class="line">            &#125;)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            log.Panic(err)</span><br><span class="line">        &#125;</span><br><span class="line">        re += req.Name + <span class="string">&quot; &quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 双向流式RPC</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *HelloService)</span></span> SayHelloBothStream(stream hello_pb.HelloService_SayHelloBothStreamServer) <span class="type">error</span> &#123;</span><br><span class="line">    <span class="comment">// 开启协程后台异步接收请求</span></span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        reqs := <span class="string">&quot;&quot;</span></span><br><span class="line">        <span class="keyword">for</span> &#123;</span><br><span class="line">            req, err := stream.Recv()</span><br><span class="line">            <span class="keyword">if</span> err == io.EOF &#123;</span><br><span class="line">                fmt.Println(<span class="string">&quot;SayHelloStreamBoth Request: &quot;</span>, reqs)</span><br><span class="line">                <span class="keyword">return</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">                log.Panic(err)</span><br><span class="line">            &#125;</span><br><span class="line">            reqs += req.Name + <span class="string">&quot; &quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;()</span><br><span class="line">    <span class="comment">// 定时发送响应</span></span><br><span class="line">    ticker := time.NewTicker(<span class="number">3</span> * time.Second)</span><br><span class="line">    <span class="keyword">defer</span> ticker.Stop()</span><br><span class="line">    <span class="keyword">for</span> <span class="keyword">range</span> ticker.C &#123;</span><br><span class="line">        err := stream.Send(&amp;hello_pb.HelloResponse&#123;</span><br><span class="line">            Message: <span class="string">&quot;Ticker Passed 3 Seconds, Send Response&quot;</span>,</span><br><span class="line">        &#125;)</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            log.Println(<span class="string">&quot;Send Error: &quot;</span>, err)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上面的流式RPC示例可以看到</p>
+<ul>
+<li>流式RPC接口不需要传入<code>context.Context</code>，因为流式RPC的<code>context</code>封装在<code>stream</code>中</li>
+<li>流式RPC接口只返回error,响应只通过 stream 对象发送（Send、SendAndClose），而请求若不为流式请求可通过参数传入</li>
+</ul>
+<h3 id="客户端示例"><a href="#客户端示例" class="headerlink" title="客户端示例"></a>客户端示例</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	msg := <span class="string">&quot;Hello World!&quot;</span></span><br><span class="line">	addr := <span class="string">&quot;localhost:8080&quot;</span></span><br><span class="line">    <span class="comment">// 1. 创建gRPC连接</span></span><br><span class="line">	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Panic(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> conn.Close()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 获取指定服务的客户端</span></span><br><span class="line">	c := hello_pb.NewHelloServiceClient(conn)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 一元RPC</span></span><br><span class="line">	ctx, cancel := context.WithTimeout(context.Background(), time.Second)</span><br><span class="line">	<span class="keyword">defer</span> cancel()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3.调用指定方法，需要手动传入context</span></span><br><span class="line">	res, err := c.SayHello(ctx, &amp;hello_pb.HelloRequest&#123;</span><br><span class="line">		Name: *msg,</span><br><span class="line">	&#125;)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Panic(err)</span><br><span class="line">	&#125;</span><br><span class="line">	log.Printf(<span class="string">&quot;普通RPC响应: %v&quot;</span>, res.Message)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>流式RPC客户端</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 服务端流式RPC</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">StreamFunc</span><span class="params">(c hello_pb.HelloServiceClient)</span></span> &#123;</span><br><span class="line">    ctx, cancel := context.WithTimeout(context.Background(), time.Second)</span><br><span class="line">    <span class="keyword">defer</span> cancel()</span><br><span class="line">    stream, err := c.SayHelloStream(ctx, &amp;hello_pb.HelloRequest&#123;&#125;)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Panic(err)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        res, err := stream.Recv()</span><br><span class="line">        <span class="keyword">if</span> err == io.EOF &#123;</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            log.Panic(<span class="string">&quot;something wrong: &quot;</span>, err)</span><br><span class="line">        &#125;</span><br><span class="line">        log.Printf(<span class="string">&quot;服务端流式RPC收到流式响应-%v\n&quot;</span>, res.Message)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 客户端流式RPC</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">StreamClientFunc</span><span class="params">(c hello_pb.HelloServiceClient)</span></span> &#123;</span><br><span class="line">    ctx, cancel := context.WithTimeout(context.Background(), time.Second)</span><br><span class="line">    <span class="keyword">defer</span> cancel()</span><br><span class="line">    stream, err := c.SayHelloStreamClient(ctx)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Panic(err)</span><br><span class="line">    &#125;</span><br><span class="line">    res := []<span class="type">string</span>&#123;<span class="string">&quot;Hello&quot;</span>, <span class="string">&quot;Bonjour&quot;</span>, <span class="string">&quot;Hola&quot;</span>, <span class="string">&quot;Hallo&quot;</span>, <span class="string">&quot;Ciao&quot;</span>, <span class="string">&quot;Ciallo~&quot;</span>&#125;</span><br><span class="line">    <span class="keyword">for</span> _, msg := <span class="keyword">range</span> res &#123;</span><br><span class="line">        err := stream.Send(&amp;hello_pb.HelloRequest&#123;</span><br><span class="line">            Name: msg,</span><br><span class="line">        &#125;)</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            log.Panic(err)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    response, err := stream.CloseAndRecv()</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Panic(err)</span><br><span class="line">    &#125;</span><br><span class="line">    log.Printf(<span class="string">&quot;客户端流式RPC收到响应-%v\n&quot;</span>, response.Message)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 双向流式RPC</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">StreamBothFunc</span><span class="params">(c hello_pb.HelloServiceClient)</span></span> &#123;</span><br><span class="line">    ctx := context.Background()</span><br><span class="line">    stream, err := c.SayHelloStreamBoth(ctx)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Panic(err)</span><br><span class="line">    &#125;</span><br><span class="line">    res := []<span class="type">string</span>&#123;<span class="string">&quot;Hello&quot;</span>, <span class="string">&quot;Bonjour&quot;</span>, <span class="string">&quot;Hola&quot;</span>, <span class="string">&quot;Hallo&quot;</span>, <span class="string">&quot;Ciao&quot;</span>, <span class="string">&quot;Ciallo~&quot;</span>&#125;</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">for</span> _, msg := <span class="keyword">range</span> res &#123;</span><br><span class="line">            log.Println(<span class="string">&quot;双向流式RPC发送-&quot;</span>, msg)</span><br><span class="line">            err := stream.Send(&amp;hello_pb.HelloRequest&#123;</span><br><span class="line">                Name: msg,</span><br><span class="line">            &#125;)</span><br><span class="line">            <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">                log.Panic(err)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        stream.CloseSend()</span><br><span class="line">    &#125;()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        response, err := stream.Recv()</span><br><span class="line">        <span class="keyword">if</span> err == io.EOF &#123;</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            log.Panic(err)</span><br><span class="line">        &#125;</span><br><span class="line">        log.Printf(<span class="string">&quot;Stream Both Response: %v\n&quot;</span>, response.Message)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#gRPC%E6%A1%86%E6%9E%B6%E5%85%A5%E9%97%A8"><span class="toc-number">1.</span> <span class="toc-text">gRPC框架入门</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#gRPC%E4%BD%BF%E7%94%A8%E7%9A%84%E5%89%8D%E7%BD%AE%E9%85%8D%E7%BD%AE"><span class="toc-number">1.1.</span> <span class="toc-text">gRPC使用的前置配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#protobuf-%E7%BC%96%E8%AF%91%E5%99%A8"><span class="toc-number">1.1.1.</span> <span class="toc-text">protobuf 编译器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AD%E8%A8%80%E6%8F%92%E4%BB%B6"><span class="toc-number">1.1.2.</span> <span class="toc-text">语言插件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#gRPC%E5%BC%80%E5%8F%91%E6%B5%81%E7%A8%8B"><span class="toc-number">1.2.</span> <span class="toc-text">gRPC开发流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#protocbuf%E7%BC%96%E5%86%99"><span class="toc-number">1.3.</span> <span class="toc-text">protocbuf编写</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%81%E5%BC%8FRPC"><span class="toc-number">1.4.</span> <span class="toc-text">流式RPC</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#gRPC%E4%BD%BF%E7%94%A8"><span class="toc-number">1.5.</span> <span class="toc-text">gRPC使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.5.1.</span> <span class="toc-text">服务端示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.5.2.</span> <span class="toc-text">客户端示例</span></a></li></ol></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&text=gRPC入门"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&title=gRPC入门"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&is_video=false&description=gRPC入门"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=gRPC入门&body=Check out this article: http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&title=gRPC入门"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&title=gRPC入门"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&title=gRPC入门"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&title=gRPC入门"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&name=gRPC入门&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2026/09/11/gRPC%E5%85%A5%E9%97%A8/&t=gRPC入门"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2026
+    John Doe
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/tcole-dev">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
